@@ -1,7 +1,7 @@
-import {IClientTransport, TcallbackOnMessage} from '../transport';
+import {IClientTransport} from '../transport';
 import {Duplex} from 'stream';
 import * as net from 'net';
-import * as transform from '../../stream/transform';
+import * as message from '../../message';
 import {extend} from '../../util';
 
 
@@ -18,13 +18,15 @@ export class Transport extends Duplex implements IClientTransport {
         port: 8080,
     };
 
-    socket: net.Socket;
+    protected socket: net.Socket;
 
-    'in': transform.LPDecoderStream;
+    protected 'in': message.LPDecoderStream;
 
-    out: transform.LPEncoderStream;
+    protected out: message.LPEncoderStream;
 
     onmessage: TcallbackOnMessage = null;
+    onstart: TcallbackOnStart = null;
+    onstop: TcallbackOnStop = null;
 
     opts: ITransportOpts;
 
@@ -40,14 +42,16 @@ export class Transport extends Duplex implements IClientTransport {
     start() {
         this.socket = new net.Socket;
 
-        this.in = new transform.LPDecoderStream(this.socket);
-        this.out = new transform.LPEncoderStream(this.socket);
+        this.in = new message.LPDecoderStream(this.socket);
+        this.out = new message.LPEncoderStream(this.socket);
+        this.resume();
 
-        this.socket.connect(this.opts.port, this.opts.host, () => {
-            this.emit('started');
-        });
+        this.socket.connect(this.opts.port, this.opts.host, () => { if(this.onstart) this.onstart(); });
+        this.socket.on('close', () => { if(this.onstop) this.onstop(); });
+    }
 
-        this.socket.on('close', () => { this.emit('close'); });
+    stop() {
+        this.socket.end();
     }
 
     _read() {

@@ -4,7 +4,7 @@ var chai_1 = require('chai');
 var serialize = require('../src/serialize');
 describe('serialize', function () {
     describe('Json', function () {
-        var serializer = new serialize.Serializer.Json;
+        var serializer = new serialize.Json;
         it('number', function () {
             var data = 123;
             var packed = serializer.pack(data);
@@ -26,7 +26,7 @@ describe('serialize', function () {
         });
     });
     describe('Msgpack', function () {
-        var serializer = new serialize.Serializer.Msgpack;
+        var serializer = new serialize.Msgpack;
         it('number', function () {
             var data = 123;
             var packed = serializer.pack(data);

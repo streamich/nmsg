@@ -4,23 +4,36 @@ import {Serializer} from '../serialize';
 import {extend} from '../util';
 
 
-export class Socket {
+export type TMessage = string|number|any;
+export type TcallbackOnMessage = (msg: TMessage) => void;
 
-    server: Server;
 
-    conn: transport.Connection;
+export interface ISocket {
+    onmessage: TcallbackOnMessage;
+    send(msg: TMessage);
+}
+
+
+export class Socket implements ISocket {
+
+    protected conn: transport.Connection;
+
+    protected serializer: Serializer;
 
     onmessage = (msg) => {};
 
-    constructor(connection: transport.Connection) {
+    constructor(connection: transport.Connection, serializer: Serializer) {
         this.conn = connection;
-        connection.onmessage = (data) => {
-            this.onmessage(data);
+        this.serializer = serializer;
+        connection.onmessage = (buf: Buffer) => {
+            var msg = this.serializer.unpack(buf);
+            this.onmessage(msg);
         };
     }
 
-    send(msg: string|Buffer) {
-        this.conn.send(msg);
+    send(msg: TMessage) {
+        var buf = this.serializer.pack(msg);
+        this.conn.send(buf);
     }
 }
 
@@ -31,7 +44,13 @@ export interface IServerOpts {
 }
 
 
-export class Server extends EventEmitter {
+export interface IServer {
+    start();
+    stop();
+}
+
+
+export class Server extends EventEmitter implements IServer {
 
     static defaultOpts: IServerOpts = {};
 
@@ -45,17 +64,19 @@ export class Server extends EventEmitter {
     }
 
     start() {
-        this.opts.transport.on('connection', (connection) => {
-            // connection.on('data', (d) => {
-            //     console.log('conn data', d);
-            // });
-            var socket = new Socket(connection);
-            socket.server = this;
+        var transport = this.opts.transport;
+        transport.on('connection', (connection) => {
+            var socket = new Socket(connection, this.opts.serializer);
             this.emit('connection', socket);
             this.emit('socket', socket);
         });
 
-        this.opts.transport.start();
+        transport.on('start',   () => { this.emit('start'); });
+        transport.on('stop',    () => { this.emit('stop'); });
+        transport.start();
     }
 
+    stop() {
+        this.opts.transport.stop();
+    }
 }

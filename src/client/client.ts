@@ -1,40 +1,48 @@
 import {EventEmitter} from 'events';
-import {IClientTransport, TcallbackOnMessage} from './transport';
+import {IClientTransport} from './transport';
+import {ISocket, IServer} from '../server/server';
+import {Serializer} from '../serialize';
+import {extend} from '../util';
 
 
 export interface IClientOpts {
     transport?: IClientTransport;
+    serializer?: Serializer;
 }
 
 
-export interface IClient {
+export class Client extends EventEmitter implements ISocket, IServer {
+
+    static defaultOpts: IClientOpts = {};
+
     onmessage: TcallbackOnMessage;
-    send(data: string|Buffer|Blob|ArrayBuffer);
-}
+    onstart: TcallbackOnStart;
+    onstop: TcallbackOnStop;
 
+    protected opts: IClientOpts = {};
 
-export class Client extends EventEmitter implements IClient {
-
-    onmessage: TcallbackOnMessage = null;
-
-    transport: IClientTransport;
-
-    constructor(opts: IClientOpts) {
+    constructor(opts: IClientOpts = {}) {
         super();
-
-        if(opts.transport) this.transport = opts.transport;
+        this.opts = extend({}, Client.defaultOpts, opts);
     }
 
-    send(data: string|Buffer) {
-        this.transport.send(data);
+    send(msg) {
+        var buf = this.opts.serializer.pack(msg);
+        this.opts.transport.send(buf);
     }
 
     start() {
-        this.transport.start();
+        var transport = this.opts.transport;
+        transport.onmessage = (buf: string|Buffer) => {
+            var msg = this.opts.serializer.unpack(buf);
+            if(this.onmessage) this.onmessage(msg);
+        };
+        transport.onstart   = () => { if(this.onstart) this.onstart(); };
+        transport.onstop    = () => { if(this.onstop) this.onstop(); };
+        transport.start();
     }
 
-    // Just a proxy for better naming.
-    connect() {
-        this.start();
+    stop() {
+        this.opts.transport.stop();
     }
 }

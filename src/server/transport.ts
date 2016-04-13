@@ -4,11 +4,14 @@ import {extend} from '../util';
 
 
 export type TcallbackOnMessage  = (chunk: Buffer|string) => void;
-export type TcallbackOnClose    = () => void;
+export type TcallbackOnStart    = () => void;
+export type TcallbackOnStop     = () => void;
 
 
 export interface IConnection {
     onmessage: TcallbackOnMessage;
+    onstart?: TcallbackOnStart;
+    onstop?: TcallbackOnStop;
     send(chunk: Buffer|string);
 }
 
@@ -16,6 +19,7 @@ export interface IConnection {
 export interface ITransport {
     opts: ITransportOpts;
     start();
+    stop();
 }
 
 
@@ -62,6 +66,7 @@ export abstract class Transport extends EventEmitter implements ITransport {
     static defaultOpts = {};
 
     abstract start();
+    abstract stop();
 
     opts: ITransportOpts;
 

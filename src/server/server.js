@@ -7,16 +7,19 @@ var __extends = (this && this.__extends) || function (d, b) {
 var events_1 = require('events');
 var util_1 = require('../util');
 var Socket = (function () {
-    function Socket(connection) {
+    function Socket(connection, serializer) {
         var _this = this;
         this.onmessage = function (msg) { };
         this.conn = connection;
-        connection.onmessage = function (data) {
-            _this.onmessage(data);
+        this.serializer = serializer;
+        connection.onmessage = function (buf) {
+            var msg = _this.serializer.unpack(buf);
+            _this.onmessage(msg);
         };
     }
     Socket.prototype.send = function (msg) {
-        this.conn.send(msg);
+        var buf = this.serializer.pack(msg);
+        this.conn.send(buf);
     };
     return Socket;
 }());
@@ -30,16 +33,18 @@ var Server = (function (_super) {
     }
     Server.prototype.start = function () {
         var _this = this;
-        this.opts.transport.on('connection', function (connection) {
-            // connection.on('data', (d) => {
-            //     console.log('conn data', d);
-            // });
-            var socket = new Socket(connection);
-            socket.server = _this;
+        var transport = this.opts.transport;
+        transport.on('connection', function (connection) {
+            var socket = new Socket(connection, _this.opts.serializer);
             _this.emit('connection', socket);
             _this.emit('socket', socket);
         });
-        this.opts.transport.start();
+        transport.on('start', function () { _this.emit('start'); });
+        transport.on('stop', function () { _this.emit('stop'); });
+        transport.start();
+    };
+    Server.prototype.stop = function () {
+        this.opts.transport.stop();
     };
     Server.defaultOpts = {};
     return Server;

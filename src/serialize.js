@@ -17,46 +17,44 @@ var Serializer = (function () {
         throw Error('Invalid unpacked data');
     };
     Serializer.toString = function (data) {
-        if (data instanceof Buffer)
-            return data.toString();
+        if (typeof data === 'string')
+            return data;
         else
-            throw Error('Invalid packed data');
+            return data.toString();
     };
     return Serializer;
 }());
-var Serializer;
-(function (Serializer) {
-    var Json = (function (_super) {
-        __extends(Json, _super);
-        function Json() {
-            _super.apply(this, arguments);
-        }
-        Json.prototype.pack = function (data) {
-            var json = JSON.stringify(data);
-            return Serializer.toBuffer(json);
-        };
-        Json.prototype.unpack = function (data) {
-            var json = Serializer.toString(data);
-            return JSON.parse(json);
-        };
-        return Json;
-    }(Serializer));
-    Serializer.Json = Json;
-    var Msgpack = (function (_super) {
-        __extends(Msgpack, _super);
-        function Msgpack() {
-            _super.apply(this, arguments);
-        }
-        Msgpack.prototype.pack = function (data) {
-            var msgpack = require('msgpack-lite');
-            return msgpack.encode(data);
-        };
-        Msgpack.prototype.unpack = function (data) {
-            var msgpack = require('msgpack-lite');
-            return msgpack.decode(data);
-        };
-        return Msgpack;
-    }(Serializer));
-    Serializer.Msgpack = Msgpack;
-})(Serializer || (Serializer = {}));
 exports.Serializer = Serializer;
+var Json = (function (_super) {
+    __extends(Json, _super);
+    function Json() {
+        _super.apply(this, arguments);
+    }
+    Json.prototype.pack = function (data) {
+        var json = JSON.stringify(data);
+        return json;
+        // return Serializer.toBuffer(json);
+    };
+    Json.prototype.unpack = function (data) {
+        var json = Serializer.toString(data);
+        return JSON.parse(json);
+    };
+    return Json;
+}(Serializer));
+exports.Json = Json;
+var Msgpack = (function (_super) {
+    __extends(Msgpack, _super);
+    function Msgpack() {
+        _super.apply(this, arguments);
+    }
+    Msgpack.prototype.pack = function (data) {
+        var msgpack = require('msgpack-lite');
+        return msgpack.encode(data);
+    };
+    Msgpack.prototype.unpack = function (data) {
+        var msgpack = require('msgpack-lite');
+        return msgpack.decode(data);
+    };
+    return Msgpack;
+}(Serializer));
+exports.Msgpack = Msgpack;

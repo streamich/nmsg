@@ -1,12 +1,12 @@
 import * as net from 'net';
 import * as transport from '../transport';
 import {extend} from '../../util';
-import * as transform from '../../stream/transform';
+import * as message from '../../message';
 
 
 export class Connection extends transport.ConnectionStream {
-    in: transform.LPDecoderStream;
-    out: transform.LPEncoderStream;
+    in: message.LPDecoderStream;
+    out: message.LPEncoderStream;
 }
 
 
@@ -23,7 +23,7 @@ export class Transport extends transport.Transport {
         port: 8080,
     };
 
-    server: net.Server;
+    protected server: net.Server;
 
     opts: ITransportOpts;
 
@@ -36,17 +36,22 @@ export class Transport extends transport.Transport {
 
         this.server.on('connection', (socket: net.Socket) => {
             var conn = new Connection;
-            conn.in = new transform.LPDecoderStream(socket);
-            conn.out = new transform.LPEncoderStream(socket);
+            conn.in = new message.LPDecoderStream(socket);
+            conn.out = new message.LPEncoderStream(socket);
             conn.resume();
             this.emit('connection', conn);
         });
 
-        this.server.on('error', (err) => { this.emit('error', err); });
+        this.server.on('error',     (err) => { this.emit('error', err); });
+        this.server.on('stop',      () => { this.emit('stop'); });
 
         this.server.listen({
             host: this.opts.host,
             port: this.opts.port,
-        }, () => { this.emit('started'); });
+        }, () => { this.emit('start'); });
+    }
+
+    stop() {
+        this.server.close();
     }
 }

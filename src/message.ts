@@ -87,7 +87,7 @@ export class LPDecoderStream extends Transform {
 
         var msg;
         while(msg = this.decoder.shift()) this.push(msg);
-        
+
         callback();
     }
 }

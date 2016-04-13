@@ -1,8 +1,8 @@
 
 
-export type TUnpacked = any;
-export type TBufferable = any|string|Buffer;
-export type TPacked = Buffer;
+export type TUnpacked = any|string|number|Array<any>;   // Unpacked data.
+export type TBufferable = any|string|Buffer;            // Types that can be converted to Buffer.
+export type TPacked = string|Buffer;                    // Normally Buffer, but for browser-only environment use string, e.g. JSON.stringify()
 
 
 export interface ISerializer {
@@ -11,7 +11,7 @@ export interface ISerializer {
 }
 
 
-abstract class Serializer implements ISerializer {
+export abstract class Serializer implements ISerializer {
 
     static toBuffer(data: TBufferable): TPacked {
         if(data instanceof Buffer) return data;
@@ -21,8 +21,8 @@ abstract class Serializer implements ISerializer {
     }
 
     static toString(data: TPacked): string {
-        if(data instanceof Buffer) return data.toString();
-        else throw Error('Invalid packed data');
+        if(typeof data === 'string') return data;
+        else return data.toString();
     }
 
     abstract pack(data: TUnpacked): TPacked;
@@ -30,33 +30,28 @@ abstract class Serializer implements ISerializer {
 }
 
 
-module Serializer {
-
-    export class Json extends Serializer {
-        pack(data: TUnpacked): TPacked {
-            var json = JSON.stringify(data);
-            return Serializer.toBuffer(json);
-        }
-
-        unpack(data: TPacked): TUnpacked {
-            var json = Serializer.toString(data);
-            return JSON.parse(json);
-        }
+export class Json extends Serializer {
+    pack(data: TUnpacked): TPacked {
+        var json = JSON.stringify(data);
+        return json;
+        // return Serializer.toBuffer(json);
     }
 
-
-    export class Msgpack extends Serializer {
-        pack(data: TUnpacked): TPacked {
-            var msgpack = require('msgpack-lite');
-            return msgpack.encode(data);
-        }
-
-        unpack(data: TPacked): TUnpacked {
-            var msgpack = require('msgpack-lite');
-            return msgpack.decode(data);
-        }
+    unpack(data: TPacked): TUnpacked {
+        var json = Serializer.toString(data);
+        return JSON.parse(json);
     }
-
 }
 
-export import Serializer = Serializer;
+
+export class Msgpack extends Serializer {
+    pack(data: TUnpacked): TPacked {
+        var msgpack = require('msgpack-lite');
+        return msgpack.encode(data);
+    }
+
+    unpack(data: TPacked): TUnpacked {
+        var msgpack = require('msgpack-lite');
+        return msgpack.decode(data);
+    }
+}

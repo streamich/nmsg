@@ -6,7 +6,7 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 var stream_1 = require('stream');
 var net = require('net');
-var transform = require('../../stream/transform');
+var message = require('../../message');
 var util_1 = require('../../util');
 var Transport = (function (_super) {
     __extends(Transport, _super);
@@ -14,6 +14,8 @@ var Transport = (function (_super) {
         if (opts === void 0) { opts = {}; }
         _super.call(this);
         this.onmessage = null;
+        this.onstart = null;
+        this.onstop = null;
         this.opts = util_1.extend({}, Transport.defaultOpts, opts);
     }
     Transport.prototype.send = function (chunk) {
@@ -22,12 +24,16 @@ var Transport = (function (_super) {
     Transport.prototype.start = function () {
         var _this = this;
         this.socket = new net.Socket;
-        this.in = new transform.LPDecoderStream(this.socket);
-        this.out = new transform.LPEncoderStream(this.socket);
-        this.socket.connect(this.opts.port, this.opts.host, function () {
-            _this.emit('started');
-        });
-        this.socket.on('close', function () { _this.emit('close'); });
+        this.in = new message.LPDecoderStream(this.socket);
+        this.out = new message.LPEncoderStream(this.socket);
+        this.resume();
+        this.socket.connect(this.opts.port, this.opts.host, function () { if (_this.onstart)
+            _this.onstart(); });
+        this.socket.on('close', function () { if (_this.onstop)
+            _this.onstop(); });
+    };
+    Transport.prototype.stop = function () {
+        this.socket.end();
     };
     Transport.prototype._read = function () {
         var _this = this;

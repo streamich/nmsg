@@ -7,7 +7,7 @@ var __extends = (this && this.__extends) || function (d, b) {
 var net = require('net');
 var transport = require('../transport');
 var util_1 = require('../../util');
-var transform = require('../../stream/transform');
+var message = require('../../message');
 var Connection = (function (_super) {
     __extends(Connection, _super);
     function Connection() {
@@ -27,16 +27,20 @@ var Transport = (function (_super) {
         this.server = net.createServer();
         this.server.on('connection', function (socket) {
             var conn = new Connection;
-            conn.in = new transform.LPDecoderStream(socket);
-            conn.out = new transform.LPEncoderStream(socket);
+            conn.in = new message.LPDecoderStream(socket);
+            conn.out = new message.LPEncoderStream(socket);
             conn.resume();
             _this.emit('connection', conn);
         });
         this.server.on('error', function (err) { _this.emit('error', err); });
+        this.server.on('stop', function () { _this.emit('stop'); });
         this.server.listen({
             host: this.opts.host,
             port: this.opts.port
-        }, function () { _this.emit('started'); });
+        }, function () { _this.emit('start'); });
+    };
+    Transport.prototype.stop = function () {
+        this.server.close();
     };
     Transport.defaultOpts = {
         host: '127.0.0.1',

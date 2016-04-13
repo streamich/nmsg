@@ -1,7 +1,9 @@
 import {Server} from './src/server/server';
-import * as tcp from './src/server/transport/tcp';
+import {Transport as ServerTransport} from './src/server/transport/tcp';
 import {Client} from './src/client/client';
 import {Transport as ClientTransport} from './src/client/transport/tcp';
+import {Json as SerializerJson} from './src/serialize';
+import * as rpc from './src/rpc';
 
 
 var conf = {
@@ -11,40 +13,63 @@ var conf = {
 
 
 function create_server(done) {
-    var mytransport = new tcp.Transport(conf);
-    mytransport.on('started', () => {
-        console.log('server started');
-        done();
+    var server = new Server({
+        transport: new ServerTransport(conf),
+        serializer: new SerializerJson,
     });
-    var opts = {
-        transport: mytransport,
-    };
-
-    var server = new Server(opts);
 
     server.on('socket', (socket) => {
-        socket.onmessage = (msg) => {
-            console.log('received', msg);
-        };
-    });
 
+        var manager = new rpc.Manager();
+
+        manager.send = (msg) => { socket.send(msg); };
+        socket.onmessage = (msg) => {
+            manager.onmessage(msg);
+        };
+
+        manager.on('test', (name, user, cb, cb2) => {
+            console.log('on test', name, user);
+            cb(null, 'Hi thre');
+            cb2('lol it works');
+        });
+
+    });
+    server.on('start', done);
     server.start();
 }
 
 
 
 create_server(() => {
-    var clienttransport = new ClientTransport(conf);
-
-    var clientopts = {
-        transport: clienttransport,
-    };
-    var client = new Client(clientopts);
-
-    clienttransport.on('started', () => {
-        console.log('client started');
-        client.send('teset');
+    var client = new Client({
+        transport: new ClientTransport(conf),
+        serializer: new SerializerJson,
     });
 
-    client.connect();
+    client.onmessage = (msg) => {
+        console.log('client', msg);
+    };
+
+    client.onstart = () => {
+        var manager = new rpc.Manager();
+
+        manager.send = (msg) => { client.send(msg); };
+        client.onmessage = (msg) => { manager.onmessage(msg); };
+
+        // manager.emit('test', 1, 2, 3);
+        manager.emit('test', 'asdf', 2, (err, res) => {
+            console.log('response from server:', err, res);
+        }, (more) => {
+            console.log(more);
+        });
+    };
+
+    client.start();
+
+
+
 });
+
+
+
+
