@@ -1,6 +1,7 @@
 {
   "version": "0.0.1",
   "description": "Interprocess messenger for Node.js",
+  "main": "index.js",
 
   "scripts": {
     "start": "npm i -g tsd mocha && tsd install node && tsd install mocha && tsd install chai",

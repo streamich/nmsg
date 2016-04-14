@@ -1,8 +1,9 @@
 import {IClientTransport} from '../transport';
-import {Duplex} from 'stream';
+import {Transform} from 'stream';
 import * as net from 'net';
 import * as message from '../../message';
 import {extend} from '../../util';
+import {Backoff} from '../../backoff';
 
 
 export interface ITransportOpts {
@@ -11,7 +12,7 @@ export interface ITransportOpts {
 }
 
 
-export class Transport extends Duplex implements IClientTransport {
+export class Transport extends Transform implements IClientTransport {
 
     static defaultOpts: ITransportOpts = {
         host: '127.0.0.1',
@@ -39,29 +40,34 @@ export class Transport extends Duplex implements IClientTransport {
         this.write(chunk);
     }
 
-    start() {
-        this.socket = new net.Socket;
+    start(backoff: Backoff) {
+        backoff.attempt((success, error) => {
+            this.socket = new net.Socket;
+            this.in = new message.LPDecoderStream(this.socket);
+            this.out = new message.LPEncoderStream(this.socket);
+            this.pipe(this.out);
+            // this.in.pipe(this);
 
-        this.in = new message.LPDecoderStream(this.socket);
-        this.out = new message.LPEncoderStream(this.socket);
-        this.resume();
+            this.in.on('data', (buf) => {
+                if(this.onmessage) this.onmessage(buf);
+            });
 
-        this.socket.connect(this.opts.port, this.opts.host, () => { if(this.onstart) this.onstart(); });
-        this.socket.on('close', () => { if(this.onstop) this.onstop(); });
+            this.socket.on('error', error);
+
+            this.socket.on('close', () => { if(this.onstop) this.onstop(); });
+
+            this.socket.connect(this.opts.port, this.opts.host, () => {
+                if(this.onstart) this.onstart();
+                success();
+            });
+        });
     }
 
     stop() {
         this.socket.end();
     }
 
-    _read() {
-        this.in.on('data', (buf: Buffer) => {
-            this.push(buf);
-            if(this.onmessage) this.onmessage(buf);
-        });
-    }
-
-    _write(chunk: string|Buffer, encoding?: string, callback?: (err?) => void) {
-        this.out.write(chunk, encoding, callback);
+    _transform(data, encoding, callback) {
+        callback(null, data);
     }
 }

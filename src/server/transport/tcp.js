@@ -10,8 +10,17 @@ var util_1 = require('../../util');
 var message = require('../../message');
 var Connection = (function (_super) {
     __extends(Connection, _super);
-    function Connection() {
-        _super.apply(this, arguments);
+    function Connection(socket) {
+        var _this = this;
+        _super.call(this);
+        this.in = new message.LPDecoderStream(socket);
+        this.out = new message.LPEncoderStream(socket);
+        this.pipe(this.out);
+        this.in.pipe(this);
+        this.in.on('data', function (buf) {
+            if (_this.onmessage)
+                _this.onmessage(buf);
+        });
     }
     return Connection;
 }(transport.ConnectionStream));
@@ -22,22 +31,29 @@ var Transport = (function (_super) {
         if (opts === void 0) { opts = {}; }
         _super.call(this, util_1.extend({}, Transport.defaultOpts, opts));
     }
-    Transport.prototype.start = function () {
+    Transport.prototype.start = function (backoff) {
         var _this = this;
-        this.server = net.createServer();
-        this.server.on('connection', function (socket) {
-            var conn = new Connection;
-            conn.in = new message.LPDecoderStream(socket);
-            conn.out = new message.LPEncoderStream(socket);
-            conn.resume();
-            _this.emit('connection', conn);
+        backoff.attempt(function (success, error) {
+            _this.server = net.createServer();
+            _this.server.on('connection', function (socket) {
+                var conn = new Connection(socket);
+                conn.resume();
+                _this.emit('connection', conn);
+            });
+            _this.server.on('error', function (err) {
+                _this.server.close();
+                _this.emit('error', err);
+                error();
+            });
+            _this.server.on('stop', function () { _this.emit('stop'); });
+            _this.server.listen({
+                host: _this.opts.host,
+                port: _this.opts.port
+            }, function () {
+                _this.emit('start');
+                success();
+            });
         });
-        this.server.on('error', function (err) { _this.emit('error', err); });
-        this.server.on('stop', function () { _this.emit('stop'); });
-        this.server.listen({
-            host: this.opts.host,
-            port: this.opts.port
-        }, function () { _this.emit('start'); });
     };
     Transport.prototype.stop = function () {
         this.server.close();

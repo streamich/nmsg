@@ -26,19 +26,11 @@ var ConnectionStream = (function (_super) {
     ConnectionStream.prototype.send = function (chunk) {
         this.write(chunk);
     };
-    ConnectionStream.prototype._read = function () {
-        var _this = this;
-        this.in.on('data', function (buf) {
-            _this.push(buf);
-            if (_this.onmessage)
-                _this.onmessage(buf);
-        });
-    };
-    ConnectionStream.prototype._write = function (chunk, encoding, callback) {
-        this.out.write(chunk, encoding, callback);
+    ConnectionStream.prototype._transform = function (data, encoding, callback) {
+        callback(null, data);
     };
     return ConnectionStream;
-}(stream_1.Duplex));
+}(stream_1.Transform));
 exports.ConnectionStream = ConnectionStream;
 var Transport = (function (_super) {
     __extends(Transport, _super);

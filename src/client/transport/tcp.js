@@ -21,35 +21,38 @@ var Transport = (function (_super) {
     Transport.prototype.send = function (chunk) {
         this.write(chunk);
     };
-    Transport.prototype.start = function () {
+    Transport.prototype.start = function (backoff) {
         var _this = this;
-        this.socket = new net.Socket;
-        this.in = new message.LPDecoderStream(this.socket);
-        this.out = new message.LPEncoderStream(this.socket);
-        this.resume();
-        this.socket.connect(this.opts.port, this.opts.host, function () { if (_this.onstart)
-            _this.onstart(); });
-        this.socket.on('close', function () { if (_this.onstop)
-            _this.onstop(); });
+        backoff.attempt(function (success, error) {
+            _this.socket = new net.Socket;
+            _this.in = new message.LPDecoderStream(_this.socket);
+            _this.out = new message.LPEncoderStream(_this.socket);
+            _this.pipe(_this.out);
+            // this.in.pipe(this);
+            _this.in.on('data', function (buf) {
+                if (_this.onmessage)
+                    _this.onmessage(buf);
+            });
+            _this.socket.on('error', error);
+            _this.socket.on('close', function () { if (_this.onstop)
+                _this.onstop(); });
+            _this.socket.connect(_this.opts.port, _this.opts.host, function () {
+                if (_this.onstart)
+                    _this.onstart();
+                success();
+            });
+        });
     };
     Transport.prototype.stop = function () {
         this.socket.end();
     };
-    Transport.prototype._read = function () {
-        var _this = this;
-        this.in.on('data', function (buf) {
-            _this.push(buf);
-            if (_this.onmessage)
-                _this.onmessage(buf);
-        });
-    };
-    Transport.prototype._write = function (chunk, encoding, callback) {
-        this.out.write(chunk, encoding, callback);
+    Transport.prototype._transform = function (data, encoding, callback) {
+        callback(null, data);
     };
     Transport.defaultOpts = {
         host: '127.0.0.1',
         port: 8080
     };
     return Transport;
-}(stream_1.Duplex));
+}(stream_1.Transform));
 exports.Transport = Transport;

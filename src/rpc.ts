@@ -1,9 +1,11 @@
-
-type TeventCallback = (...args: any[]) => void;
-type TeventCallbackList = TeventCallback[];
+import {ISocket} from './server/server';
 
 
-interface IFrameData {
+export type TeventCallback = (...args: any[]) => void;
+export type TeventCallbackList = TeventCallback[];
+
+
+export interface IFrameData {
     i: number;      // Frame ID.
     a?: any[];      // Data sent in function call where functions are removed.
     c?: number[];   // List of positions where functions in arguments where removed.
@@ -11,12 +13,12 @@ interface IFrameData {
 }
 
 
-interface IFrameDataInitiation extends IFrameData {
+export interface IFrameDataInitiation extends IFrameData {
     e: string;      // Event name or API method name.
 }
 
 
-interface IFrameDataResponse extends IFrameData {
+export interface IFrameDataResponse extends IFrameData {
     r: number;      // Response ID, i.e. ID of the frame to which this is a response.
     f: number;      // Callback pos, index of the callback which was called.
 }
@@ -85,7 +87,7 @@ export class FrameOutgoing extends Frame {
     }
 
     serialize() {
-        var data: IFrameDataInitiation | IFrameDataResponse = {
+        var data: any = {
             i: this.id,
             e: this.event,
         };
@@ -197,7 +199,7 @@ export class FrameIncoming extends Frame {
 }
 
 
-export class Manager {
+export class Router {
 
     latency = 500; // Client to server latency in milliseconds, expected.
 
@@ -250,6 +252,13 @@ export class Manager {
         if(!request.hasCallbacks()) delete this.frame[request.id];
     }
 
+    constructor(socket?: ISocket) {
+        if(socket) {
+            this.send = socket.send.bind(socket);
+            socket.onmessage = (msg) => { this.onmessage(msg); };
+        }
+    }
+
     // This function is called by user.
     onmessage(msg) {
         var frame = new FrameIncoming;
@@ -277,8 +286,8 @@ interface IFrameDataBuffered extends IFrameData {
 }
 
 
-// Same as `Manager`, but buffers all frames for 5 milliseconds and then sends a list of all frames at once.
-export class ManagerBuffered extends Manager {
+// Same as `Router`, but buffers all frames for 5 milliseconds and then sends a list of all frames at once.
+export class RouterBuffered extends Router {
 
     cycle = 5; // Milliseconds for how long to buffer requests.
 

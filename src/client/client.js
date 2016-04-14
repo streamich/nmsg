@@ -30,7 +30,8 @@ var Client = (function (_super) {
             _this.onstart(); };
         transport.onstop = function () { if (_this.onstop)
             _this.onstop(); };
-        transport.start();
+        transport.start(this.opts.backoff);
+        return this;
     };
     Client.prototype.stop = function () {
         this.opts.transport.stop();
@@ -39,3 +40,24 @@ var Client = (function (_super) {
     return Client;
 }(events_1.EventEmitter));
 exports.Client = Client;
+var backoff_1 = require('../backoff');
+var serialize_1 = require('../serialize');
+var tcp_1 = require('./transport/tcp');
+var rpc_1 = require('../rpc');
+var factory;
+(function (factory) {
+    var Tcp = (function (_super) {
+        __extends(Tcp, _super);
+        function Tcp(opts) {
+            _super.call(this, {
+                transport: new tcp_1.Transport(opts),
+                serializer: new serialize_1.Msgpack,
+                backoff: new backoff_1.BackoffExponential
+            });
+            this.router = new rpc_1.Router(this);
+        }
+        return Tcp;
+    }(Client));
+    factory.Tcp = Tcp;
+})(factory || (factory = {}));
+exports.factory = factory;

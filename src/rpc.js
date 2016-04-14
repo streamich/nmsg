@@ -186,15 +186,20 @@ var FrameIncoming = (function (_super) {
     return FrameIncoming;
 }(Frame));
 exports.FrameIncoming = FrameIncoming;
-var Manager = (function () {
-    function Manager() {
+var Router = (function () {
+    function Router(socket) {
+        var _this = this;
         this.latency = 500; // Client to server latency in milliseconds, expected.
         // List of frames (by ID) which had callbacks, we keep track of them to send back responses to callbacks, if received.
         this.frame = {};
         // List of subscriber functions .on()
         this.subs = {};
+        if (socket) {
+            this.send = socket.send.bind(socket);
+            socket.onmessage = function (msg) { _this.onmessage(msg); };
+        }
     }
-    Manager.prototype.genCallack = function (frame, pos) {
+    Router.prototype.genCallack = function (frame, pos) {
         var _this = this;
         return function () {
             var args = [];
@@ -204,12 +209,12 @@ var Manager = (function () {
             _this.dispatch(FrameOutgoing.createResponse(frame, pos, args));
         };
     };
-    Manager.prototype.getSubList = function (event) {
+    Router.prototype.getSubList = function (event) {
         if (!this.subs[event])
             this.subs[event] = [];
         return this.subs[event];
     };
-    Manager.prototype.pub = function (frame) {
+    Router.prototype.pub = function (frame) {
         var event = frame.event;
         if (!event)
             return;
@@ -219,7 +224,7 @@ var Manager = (function () {
             sub.apply(null, frame.args);
         }
     };
-    Manager.prototype.dispatch = function (frame) {
+    Router.prototype.dispatch = function (frame) {
         var _this = this;
         if (frame.hasCallbacks()) {
             this.frame[frame.id] = frame;
@@ -230,7 +235,7 @@ var Manager = (function () {
         // console.log('dispatch', data);
         this.send(data);
     };
-    Manager.prototype.processResponse = function (frame) {
+    Router.prototype.processResponse = function (frame) {
         var request = this.frame[frame.rid];
         if (!request)
             return; // Cannot find the original request.
@@ -240,7 +245,7 @@ var Manager = (function () {
             delete this.frame[request.id];
     };
     // This function is called by user.
-    Manager.prototype.onmessage = function (msg) {
+    Router.prototype.onmessage = function (msg) {
         var frame = new FrameIncoming;
         frame.unserialize(msg, this.genCallack.bind(this));
         if (frame.isResponse())
@@ -248,12 +253,12 @@ var Manager = (function () {
         else
             this.pub(frame);
     };
-    Manager.prototype.on = function (event, callback) {
+    Router.prototype.on = function (event, callback) {
         var list = this.getSubList(event);
         list.push(callback);
         return this;
     };
-    Manager.prototype.emit = function (event) {
+    Router.prototype.emit = function (event) {
         var args = [];
         for (var _i = 1; _i < arguments.length; _i++) {
             args[_i - 1] = arguments[_i];
@@ -261,19 +266,19 @@ var Manager = (function () {
         var frame = new FrameOutgoing(args, event);
         this.dispatch(frame);
     };
-    return Manager;
+    return Router;
 }());
-exports.Manager = Manager;
-// Same as `Manager`, but buffers all frames for 5 milliseconds and then sends a list of all frames at once.
-var ManagerBuffered = (function (_super) {
-    __extends(ManagerBuffered, _super);
-    function ManagerBuffered() {
+exports.Router = Router;
+// Same as `Router`, but buffers all frames for 5 milliseconds and then sends a list of all frames at once.
+var RouterBuffered = (function (_super) {
+    __extends(RouterBuffered, _super);
+    function RouterBuffered() {
         _super.apply(this, arguments);
         this.cycle = 5; // Milliseconds for how long to buffer requests.
         this.buffer = [];
     }
-    ManagerBuffered.prototype.flush = function () {
+    RouterBuffered.prototype.flush = function () {
     };
-    return ManagerBuffered;
-}(Manager));
-exports.ManagerBuffered = ManagerBuffered;
+    return RouterBuffered;
+}(Router));
+exports.RouterBuffered = RouterBuffered;

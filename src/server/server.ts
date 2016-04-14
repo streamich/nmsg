@@ -2,6 +2,7 @@ import * as transport from './transport';
 import {EventEmitter} from 'events';
 import {Serializer} from '../serialize';
 import {extend} from '../util';
+import {Backoff} from '../backoff';
 
 
 export type TMessage = string|number|any;
@@ -41,11 +42,12 @@ export class Socket implements ISocket {
 export interface IServerOpts {
     transport?: transport.Transport;
     serializer?: Serializer;
+    backoff?: Backoff;
 }
 
 
 export interface IServer {
-    start();
+    start(): this;
     stop();
 }
 
@@ -63,20 +65,55 @@ export class Server extends EventEmitter implements IServer {
         this.opts = extend({}, Server.defaultOpts, opts);
     }
 
-    start() {
+    protected createSocket(connection, serializer) {
+        return new Socket(connection, serializer)
+    }
+
+    start(): this {
         var transport = this.opts.transport;
         transport.on('connection', (connection) => {
-            var socket = new Socket(connection, this.opts.serializer);
+            var socket = this.createSocket(connection, this.opts.serializer);
             this.emit('connection', socket);
             this.emit('socket', socket);
         });
 
         transport.on('start',   () => { this.emit('start'); });
         transport.on('stop',    () => { this.emit('stop'); });
-        transport.start();
+        transport.start(this.opts.backoff);
+        return this;
     }
 
     stop() {
         this.opts.transport.stop();
     }
 }
+
+
+import {BackoffExponential} from '../backoff';
+import {Msgpack as MsgpackSerializer} from '../serialize';
+import {Transport as TcpTransport, ITransportOpts} from './transport/tcp';
+import {Router} from '../rpc';
+
+module factory {
+    export class TcpSocket extends Socket {
+        router = new Router(this);
+    }
+
+    export interface ITcpOpts extends ITransportOpts {}
+
+    export class Tcp extends Server {
+        constructor(opts: ITcpOpts) {
+            super({
+                transport: new TcpTransport(opts),
+                serializer: new MsgpackSerializer,
+                backoff: new BackoffExponential,
+            });
+        }
+
+        protected createSocket(connection, serializer) {
+            return new TcpSocket(connection, serializer)
+        }
+    }
+}
+
+export import factory = factory;

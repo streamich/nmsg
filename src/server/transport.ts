@@ -1,6 +1,7 @@
 import {Readable, Writable, Duplex, Transform} from 'stream';
 import {EventEmitter} from 'events';
 import {extend} from '../util';
+import {Backoff} from '../backoff';
 
 
 export type TcallbackOnMessage  = (chunk: Buffer|string) => void;
@@ -18,7 +19,7 @@ export interface IConnection {
 
 export interface ITransport {
     opts: ITransportOpts;
-    start();
+    start(backoff: Backoff);
     stop();
 }
 
@@ -32,7 +33,7 @@ export abstract class Connection extends Duplex implements IConnection {
 }
 
 
-export abstract class ConnectionStream extends Duplex implements IConnection {
+export abstract class ConnectionStream extends Transform implements IConnection {
     'in': Readable | Duplex | Transform;
 
     out: Writable | Duplex | Transform;
@@ -43,15 +44,8 @@ export abstract class ConnectionStream extends Duplex implements IConnection {
         this.write(chunk);
     }
 
-    _read() {
-        this.in.on('data', (buf: Buffer) => {
-            this.push(buf);
-            if(this.onmessage) this.onmessage(buf);
-        });
-    }
-
-    _write(chunk: string|Buffer, encoding?: string, callback?: (err?) => void) {
-        this.out.write(chunk, encoding, callback);
+    _transform(data, encoding, callback) {
+        callback(null, data);
     }
 }
 
@@ -65,7 +59,7 @@ export abstract class Transport extends EventEmitter implements ITransport {
 
     static defaultOpts = {};
 
-    abstract start();
+    abstract start(backoff: Backoff);
     abstract stop();
 
     opts: ITransportOpts;
