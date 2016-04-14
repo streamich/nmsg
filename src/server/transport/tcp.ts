@@ -2,7 +2,7 @@ import * as net from 'net';
 import * as transport from '../transport';
 import {extend} from '../../util';
 import * as message from '../../message';
-import {Backoff} from '../../nmsg/backoff';
+import {Backoff} from '../../backoff';
 
 
 export class Connection extends transport.ConnectionStream {

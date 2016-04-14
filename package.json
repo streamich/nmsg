@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.0.1",
   "name": "nmsg",
   "description": "Interprocess messenger for Node.js",
   "main": "index.js",
@@ -23,12 +23,14 @@
   },
 
   "scripts": {
+    "prepublish": "npm run typing && git add -A && git commit -m \"Publishing\" && npm version patch && git push -u origin master",
     "start": "npm i -g tsd mocha && tsd install node && tsd install mocha && tsd install chai",
     "typing": "node ./scripts/dts.js",
     "test": "mocha"
   },
 
   "dependencies": {
+    "nmsg-rpc":         "*",
     "msgpack-lite":     "0.1.17"
   },
 
