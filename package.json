@@ -1,9 +1,8 @@
 {
-  "version": "1.0.1",
+  "version": "1.0.2",
   "name": "nmsg",
   "description": "Interprocess messenger for Node.js",
   "main": "index.js",
-
   "keywords": [
     "nmsg",
     "node-messenger",
@@ -16,27 +15,22 @@
     "sockjs",
     "socket.io"
   ],
-
   "repository": {
     "type": "git",
     "url": "https://github.com/streamich/nmsg"
   },
-
   "scripts": {
     "prepublish": "npm run typing && git add -A && git commit -m \"Publishing\" && npm version patch && git push -u origin master",
     "start": "npm i -g tsd mocha && tsd install node && tsd install mocha && tsd install chai",
     "typing": "node ./scripts/dts.js",
     "test": "mocha"
   },
-
   "dependencies": {
-    "nmsg-rpc":         "*",
-    "msgpack-lite":     "0.1.17"
+    "nmsg-rpc": "*",
+    "msgpack-lite": "0.1.17"
   },
-
   "devDependencies": {
-    "dts-generator":    "1.7.0",
-    "chai":             "*"
+    "dts-generator": "1.7.0",
+    "chai": "*"
   }
-
 }
