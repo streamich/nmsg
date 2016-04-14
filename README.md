@@ -5,16 +5,16 @@ communication between two remote JavaScript processes.
 
 Features include:
 
- - Client and server with bidirectional communication -- each can `.emit` or listen `.on` events.
+ - Client and server with bidirectional communication -- each can `.emit` and listen `.on` events.
  - Evented router, you add events using: `router.on('event', callback)`.
- - Your can send callbacks as a arguments for a remote call, like `router.emit('event', 'data', callback)`.
- - Multiple callbacks per event supported, if called on the remote host, arguments for those functions will be passed back, where arguments can themselves be callbacks, this nesting can be arbitrarily deep.
+ - Your can send callbacks as arguments for a remote call, like `router.emit('event', 'data', callback)`.
+ - Multiple callbacks per event supported, if called on the remote host, arguments for those callbacks will be passed back, where arguments can themselves be callbacks, this nesting can be [arbitrarily deep](./examples/callbacks.ts).
  - Pluggable transports (currently implemented `TCP`).
  - Pluggable data serializers (currently implemented `JSON` and `MsgPack`).
  - Exponential backoff for client and server to retry connection.
  - Stream buffering -- even if server is temporarily down, your messages will still likely be delivered, see example below:
  
-For examples see `./examples` folder, here is one:
+For examples see [`./examples`](./examples) folder, here is one:
 
 ```js
 var nmsg = require('nmsg');
