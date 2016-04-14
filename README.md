@@ -1,5 +1,7 @@
 # Node Messenger
 
+> This is work in progress, use at YOUR own risk.
+
 Inter-process communication (IPC) for Node.js, designed for easy
 communication between two remote JavaScript processes.
 
@@ -44,6 +46,8 @@ In this example we send the `ping` event even before the server has been started
     Sending ping.
     Server started.
     Ping received!
+
+*TypeScript* type definitions available in [./nmsg.d.ts](./nmsg.d.ts).
 
 Getting started:
 
