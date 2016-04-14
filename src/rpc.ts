@@ -230,6 +230,10 @@ export class Router {
         for(var sub of list) sub.apply(null, frame.args);
     }
 
+    protected sendData(data) {
+        this.send(data);
+    }
+
     protected dispatch(frame: FrameOutgoing) {
         if(frame.hasCallbacks()) {
             this.frame[frame.id] = frame;
@@ -240,7 +244,7 @@ export class Router {
 
         var data = frame.serialize();
         // console.log('dispatch', data);
-        this.send(data);
+        this.sendData(data);
     }
 
     protected processResponse(frame: FrameIncoming) {
@@ -274,15 +278,17 @@ export class Router {
         return this;
     }
 
-    emit(event: string, ...args: any[]) {
+    emit(event: string, ...args: any[]): this {
         var frame = new FrameOutgoing(args, event);
         this.dispatch(frame);
+        return this;
     }
 }
 
+type FrameList = (IFrameDataInitiation | IFrameDataResponse)[];
 
-interface IFrameDataBuffered extends IFrameData {
-    b: (IFrameDataInitiation | IFrameDataResponse)[];
+interface IFrameDataBuffered {
+    b: FrameList; // B for bulk.
 }
 
 
@@ -291,9 +297,36 @@ export class RouterBuffered extends Router {
 
     cycle = 5; // Milliseconds for how long to buffer requests.
 
-    protected buffer: FrameOutgoing[] = [];
+    timer: any = 0;
+
+    protected buffer: FrameList = [];
 
     protected flush() {
+        var data: IFrameDataBuffered = {b: this.buffer};
+        this.send(data);
+        this.buffer = [];
+    }
 
+    protected sendData(data) {
+        this.buffer.push(data);
+        this.startTimer();
+    }
+
+    protected startTimer() {
+        if(!this.timer) {
+            this.timer = setTimeout(() => {
+                this.timer = 0;
+                this.flush();
+            }, this.cycle);
+        }
+    }
+
+    onmessage(msg) {
+        console.log('msg', msg);
+        if(typeof msg != 'object') return;
+        if(msg.b) { // Buffered bulk request.
+            if(!(msg.b instanceof Array)) return;
+            for(var fmsg of msg.b) super.onmessage(fmsg);
+        } else super.onmessage(msg);
     }
 }

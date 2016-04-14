@@ -64,7 +64,7 @@ var factory;
         __extends(TcpSocket, _super);
         function TcpSocket() {
             _super.apply(this, arguments);
-            this.router = new rpc_1.Router(this);
+            this.router = new rpc_1.RouterBuffered(this);
         }
         return TcpSocket;
     }(Socket));

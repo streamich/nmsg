@@ -54,13 +54,13 @@ export class Client extends EventEmitter implements ISocket, IServer {
 import {BackoffExponential} from '../backoff';
 import {Msgpack as MsgpackSerializer} from '../serialize';
 import {Transport as TcpTransport, ITransportOpts} from './transport/tcp';
-import {Router} from '../rpc';
+import {RouterBuffered} from '../rpc';
 
 module factory {
     export interface ITcpOpts extends ITransportOpts {}
 
     export class Tcp extends Client {
-        router = new Router(this);
+        router = new RouterBuffered(this);
 
         constructor(opts: ITcpOpts) {
             super({

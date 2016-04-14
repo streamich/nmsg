@@ -54,7 +54,7 @@ var factory;
                 serializer: new serialize_1.Msgpack,
                 backoff: new backoff_1.BackoffExponential
             });
-            this.router = new rpc_1.Router(this);
+            this.router = new rpc_1.RouterBuffered(this);
         }
         return Tcp;
     }(Client));

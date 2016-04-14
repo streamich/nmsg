@@ -92,11 +92,11 @@ export class Server extends EventEmitter implements IServer {
 import {BackoffExponential} from '../backoff';
 import {Msgpack as MsgpackSerializer} from '../serialize';
 import {Transport as TcpTransport, ITransportOpts} from './transport/tcp';
-import {Router} from '../rpc';
+import {RouterBuffered} from '../rpc';
 
 module factory {
     export class TcpSocket extends Socket {
-        router = new Router(this);
+        router = new RouterBuffered(this);
     }
 
     export interface ITcpOpts extends ITransportOpts {}

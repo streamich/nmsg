@@ -224,6 +224,9 @@ var Router = (function () {
             sub.apply(null, frame.args);
         }
     };
+    Router.prototype.sendData = function (data) {
+        this.send(data);
+    };
     Router.prototype.dispatch = function (frame) {
         var _this = this;
         if (frame.hasCallbacks()) {
@@ -233,7 +236,7 @@ var Router = (function () {
         }
         var data = frame.serialize();
         // console.log('dispatch', data);
-        this.send(data);
+        this.sendData(data);
     };
     Router.prototype.processResponse = function (frame) {
         var request = this.frame[frame.rid];
@@ -265,6 +268,7 @@ var Router = (function () {
         }
         var frame = new FrameOutgoing(args, event);
         this.dispatch(frame);
+        return this;
     };
     return Router;
 }());
@@ -275,9 +279,41 @@ var RouterBuffered = (function (_super) {
     function RouterBuffered() {
         _super.apply(this, arguments);
         this.cycle = 5; // Milliseconds for how long to buffer requests.
+        this.timer = 0;
         this.buffer = [];
     }
     RouterBuffered.prototype.flush = function () {
+        var data = { b: this.buffer };
+        this.send(data);
+        this.buffer = [];
+    };
+    RouterBuffered.prototype.sendData = function (data) {
+        this.buffer.push(data);
+        this.startTimer();
+    };
+    RouterBuffered.prototype.startTimer = function () {
+        var _this = this;
+        if (!this.timer) {
+            this.timer = setTimeout(function () {
+                _this.timer = 0;
+                _this.flush();
+            }, this.cycle);
+        }
+    };
+    RouterBuffered.prototype.onmessage = function (msg) {
+        console.log('msg', msg);
+        if (typeof msg != 'object')
+            return;
+        if (msg.b) {
+            if (!(msg.b instanceof Array))
+                return;
+            for (var _i = 0, _a = msg.b; _i < _a.length; _i++) {
+                var fmsg = _a[_i];
+                _super.prototype.onmessage.call(this, fmsg);
+            }
+        }
+        else
+            _super.prototype.onmessage.call(this, msg);
     };
     return RouterBuffered;
 }(Router));
