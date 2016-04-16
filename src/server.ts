@@ -4,7 +4,7 @@ import * as serialize from './serialize';
 import * as backoff from './backoff';
 
 
-export type TMessage = serialize.TUnpacked;
+export type TMessage                    = serialize.TUnpacked;
 export type TcallbackOnSocketMessage    = (message: TMessage, socket: ISocket) => void;
 export type TcallbackOnSocket           = (socket: ISocket) => void;
 export type TcallbackWiretapServer      = (message: TMessage, socket: ISocket) => void;

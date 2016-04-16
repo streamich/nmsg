@@ -15,11 +15,11 @@ export class Client extends server.Server implements IClient {
 
     protected transport: transport.ClientTransport;
 
-    protected opts: IClientOpts = {};
+    protected opts: IClientOpts;
 
     onmessage: server.TcallbackOnSocketMessage = noop;
 
     send(message: server.TMessage) {
-        this.transport.send(message);
+        this.opts.transport.send(message);
     }
 }

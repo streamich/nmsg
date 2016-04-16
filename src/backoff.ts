@@ -8,7 +8,7 @@ export interface IBackoff {
 }
 
 
-export abstract class Backoff {
+export abstract class Backoff implements IBackoff {
 
     protected retryCount = 0;
 
@@ -25,7 +25,7 @@ export abstract class Backoff {
         this.operation(this.onSuccess.bind(this), this.onError.bind(this));
     }
 
-    attempt(operation: (success: TcallbackSuccess, error: TcallbackError) => void) {
+    attempt(operation: TcallbackOperation) {
         this.operation = operation;
         this.retry();
     }

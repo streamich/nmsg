@@ -14,13 +14,26 @@ var Connection = (function () {
 exports.Connection = Connection;
 var Transport = (function () {
     function Transport(opts) {
-        this.opts = {};
+        this.opts = {
+            serializer: null
+        };
         this.onconnection = util_1.noop;
         this.onstart = util_1.noop;
         this.onstop = util_1.noop;
         this.onerror = util_1.noop;
         this.opts = util_1.extend(this.opts, opts);
     }
+    Transport.prototype.createConncetion = function () {
+        var connection = new this.ClassConnection;
+        connection.transport = this;
+        return connection;
+    };
+    Transport.prototype.serialize = function (message) {
+        return this.opts.serializer.pack(message);
+    };
+    Transport.prototype.unserialize = function (data) {
+        return this.opts.serializer.unpack(data);
+    };
     return Transport;
 }());
 exports.Transport = Transport;

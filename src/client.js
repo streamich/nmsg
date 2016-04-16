@@ -10,11 +10,10 @@ var Client = (function (_super) {
     __extends(Client, _super);
     function Client() {
         _super.apply(this, arguments);
-        this.opts = {};
         this.onmessage = util_1.noop;
     }
     Client.prototype.send = function (message) {
-        this.transport.send(message);
+        this.opts.transport.send(message);
     };
     return Client;
 }(server.Server));
