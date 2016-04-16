@@ -67,7 +67,7 @@ Generate `nmsg.d.ts` typing file:
     
 Publishing:
 
-    npm publish
+    npm run mypublish
     
 ## License
 

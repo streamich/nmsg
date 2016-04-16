@@ -42,16 +42,3 @@ export class Json extends Serializer {
         return JSON.parse(json);
     }
 }
-
-
-export class Msgpack extends Serializer {
-    pack(data: TUnpacked): TPacked {
-        var msgpack = require('msgpack-lite');
-        return msgpack.encode(data);
-    }
-
-    unpack(data: TPacked): TUnpacked {
-        var msgpack = require('msgpack-lite');
-        return msgpack.decode(data);
-    }
-}

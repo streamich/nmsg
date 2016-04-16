@@ -1,6 +1,6 @@
 require('dts-generator').default({
     name: 'nmsg',
-    main: 'nmsg',
+    // main: 'nmsg',
     project: './src',
     out: 'nmsg.d.ts',
     excludes: [

@@ -13,3 +13,5 @@ function extend(obj1, obj2) {
         return obj1;
 }
 exports.extend = extend;
+function noop() { }
+exports.noop = noop;

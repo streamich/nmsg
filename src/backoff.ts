@@ -1,14 +1,18 @@
+export type TcallbackSuccess = () => void;
+export type TcallbackError = (err?: any) => void;
+export type TcallbackOperation = (success: TcallbackSuccess, error: TcallbackError) => void;
 
-export type cbSuccess = () => void;
-export type cbError = (err?: any) => void;
-export type cbOperation = (success: cbSuccess, error: cbError) => void;
+
+export interface IBackoff {
+    attempt(operation: TcallbackOperation);
+}
 
 
 export abstract class Backoff {
 
     protected retryCount = 0;
 
-    protected operation: cbOperation;
+    protected operation: TcallbackOperation;
 
     protected abstract onError(err);
 
@@ -21,7 +25,7 @@ export abstract class Backoff {
         this.operation(this.onSuccess.bind(this), this.onError.bind(this));
     }
 
-    attempt(operation: (success: cbSuccess, error: cbError) => void) {
+    attempt(operation: (success: TcallbackSuccess, error: TcallbackError) => void) {
         this.operation = operation;
         this.retry();
     }

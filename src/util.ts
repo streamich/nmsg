@@ -5,3 +5,5 @@ export function extend<T> (obj1: T, obj2: T, ...objs: T[]): T {
     if(objs.length) return extend.apply(null, [obj1, ...objs]);
     else return obj1;
 }
+
+export function noop() {}

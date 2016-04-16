@@ -42,19 +42,3 @@ var Json = (function (_super) {
     return Json;
 }(Serializer));
 exports.Json = Json;
-var Msgpack = (function (_super) {
-    __extends(Msgpack, _super);
-    function Msgpack() {
-        _super.apply(this, arguments);
-    }
-    Msgpack.prototype.pack = function (data) {
-        var msgpack = require('msgpack-lite');
-        return msgpack.encode(data);
-    };
-    Msgpack.prototype.unpack = function (data) {
-        var msgpack = require('msgpack-lite');
-        return msgpack.decode(data);
-    };
-    return Msgpack;
-}(Serializer));
-exports.Msgpack = Msgpack;
