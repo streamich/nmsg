@@ -1,6 +1,6 @@
-/// <reference path="./typing.d.ts" />
+/// <reference path="../../typings/test.d.ts" />
 import {expect} from 'chai';
-import * as serialize from '../src/serialize';
+import * as serialize from '../serialize';
 
 
 describe('serialize', function() {

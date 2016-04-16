@@ -91,3 +91,10 @@ export class LPDecoderStream extends Transform {
         callback();
     }
 }
+
+
+export class Buffered extends Transform {
+
+    
+
+}

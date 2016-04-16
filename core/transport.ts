@@ -17,7 +17,7 @@ export interface IConnection {
 }
 
 export interface ITransportOpts {
-    serializer: ISerializer;
+    serializer?: ISerializer;
 }
 
 export interface ITransport {
@@ -40,7 +40,7 @@ export abstract class Connection implements IConnection {
 
     transport: Transport;
 
-    onmessage: TcallbackOnMessage = noop;
+    onmessage: TcallbackOnMessage = noop as TcallbackOnMessage;
 
     abstract send(message: TUnpacked);
 }
@@ -53,10 +53,10 @@ export abstract class Transport implements ITransport {
 
     ClassConnection;
 
-    onconnection:   TcallbackOnConnection    = noop;
-    onstart:        TcallbackOnStart         = noop;
-    onstop:         TcallbackOnStop          = noop;
-    onerror:        TcallbackOnError         = noop;
+    onconnection:   TcallbackOnConnection    = noop as TcallbackOnConnection;
+    onstart:        TcallbackOnStart         = noop as TcallbackOnStart;
+    onstop:         TcallbackOnStop          = noop as TcallbackOnStop;
+    onerror:        TcallbackOnError         = noop as TcallbackOnError;
 
     constructor(opts: ITransportOpts) {
         this.opts = extend(this.opts, opts);
@@ -68,6 +68,7 @@ export abstract class Transport implements ITransport {
     protected createConncetion(): Connection {
         var connection = new this.ClassConnection;
         connection.transport = this;
+        connection.serializer = this.opts.serializer;
         return connection as Connection;
     }
 
@@ -81,6 +82,6 @@ export abstract class Transport implements ITransport {
 }
 
 export abstract class ClientTransport extends Transport implements IClientTransport {
-    onmessage: TcallbackOnMessage = noop;
+    onmessage: TcallbackOnMessage = noop as TcallbackOnMessage;
     abstract send(message: TUnpacked);
 }

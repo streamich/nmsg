@@ -1,5 +1,5 @@
 module.exports = {
-    core: require('./core/exports'),
-    rpc: require('./rpc/exports'),
-    tcp: require('./tcp/exports')
+    core: require('./core/export'),
+    // rpc: require('./rpc/export'),
+    // tcp: require('./tcp/export')
 };

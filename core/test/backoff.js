@@ -1,7 +1,7 @@
 "use strict";
-/// <reference path="./typing.d.ts" />
+/// <reference path="../../typings/test.d.ts" />
 var chai_1 = require('chai');
-var backoff = require('../src/backoff');
+var backoff = require('../backoff');
 describe('backoff', function () {
     describe('Exponential', function () {
         it('number', function (done) {

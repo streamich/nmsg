@@ -4,23 +4,25 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var util_1 = require('../node_modules/nmsg/src/util');
+var util_1 = require('../core/util');
 var serialize_1 = require('./serialize');
-var transport = require('../node_modules/nmsg/src/transport');
+var transport = require('../core/transport');
 var stream = require('./stream');
 var net = require('net');
 var ConnectionTcp = (function (_super) {
     __extends(ConnectionTcp, _super);
-    function ConnectionTcp(socket) {
+    function ConnectionTcp() {
+        _super.apply(this, arguments);
+    }
+    ConnectionTcp.prototype.setSocket = function (socket) {
         var _this = this;
-        _super.call(this);
         this.out = new stream.LPEncoderStream(socket);
         this.in = new stream.LPDecoderStream(socket);
         this.in.on('data', function (buf) {
             var message = _this.transport.unserialize(buf);
             _this.onmessage(message);
         });
-    }
+    };
     ConnectionTcp.prototype.send = function (message) {
         var data = this.transport.serialize(message);
         this.out.write(data);
@@ -32,13 +34,14 @@ var TransportTcp = (function (_super) {
     __extends(TransportTcp, _super);
     function TransportTcp(opts) {
         _super.call(this, util_1.extend({}, TransportTcp.defaults, opts));
+        this.ClassConnection = ConnectionTcp;
     }
     TransportTcp.prototype.start = function (success, error) {
         var _this = this;
         this.server = net.createServer();
         this.server.on('connection', function (socket) {
-            var conn = new ConnectionTcp(socket);
-            conn.serializer = _this.opts.serializer;
+            var conn = _this.createConncetion();
+            conn.setSocket(socket);
             _this.onconnection(conn);
         });
         this.server.on('error', function (err) {
@@ -46,7 +49,7 @@ var TransportTcp = (function (_super) {
             _this.server.close();
             error();
         });
-        this.server.on('stop', function () { _this.onstop(); });
+        this.server.on('close', function () { _this.onstop(); });
         this.server.listen({
             host: this.opts.host,
             port: this.opts.port

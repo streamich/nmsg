@@ -1,10 +1,10 @@
 import {TransportTcp, ITransportTcpOpts} from './server';
 import {ClientTransportTcp, IClientTransportTcpOpts} from './client';
-import {Server} from '../node_modules/nmsg/src/server';
-import {Client} from '../node_modules/nmsg/src/client';
-import {ISerializer} from '../node_modules/nmsg/src/serialize';
+import {Server} from '../core/server';
+import {Client} from '../core/client';
+import {ISerializer} from '../core/serialize';
 import {Msgpack as Serializer} from './serialize';
-import {BackoffExponential as Backoff, IBackoff} from '../node_modules/nmsg/src/backoff';
+import {BackoffExponential as Backoff, IBackoff} from '../core/backoff';
 
 
 export interface IcreateServerOpts {
@@ -16,16 +16,20 @@ export interface IcreateServerOpts {
 
 export interface IcreateClientOpts extends IcreateServerOpts {}
 
-function fill_opts(opts: IcreateServerOpts) {
-    if(!opts.host)          opts.host = '127.0.0.1';
+function fill_opts(opts: IcreateServerOpts | IcreateClientOpts, host = '0.0.0.0') {
+    if(typeof opts === 'number')
+        opts = {port: opts} as any as IcreateServerOpts;
+
+    if(!opts.host)          opts.host = host;
     if(!opts.port)          opts.port = 8080;
     if(!opts.serializer)    opts.serializer = new Serializer;
     if(!opts.backoff)       opts.backoff = new Backoff;
+    return opts;
 } 
 
 
 export function createServer(opts: IcreateServerOpts = {}): Server {
-    fill_opts(opts);
+    opts = fill_opts(opts);
     var topts: ITransportTcpOpts = {
         host: opts.host, 
         port: opts.port,
@@ -40,7 +44,7 @@ export function createServer(opts: IcreateServerOpts = {}): Server {
 
 
 export function createClient(opts: IcreateClientOpts = {}): Client {
-    fill_opts(opts);
+    opts = fill_opts(opts, '127.0.0.1');
     var topts: IClientTransportTcpOpts = {
         host: opts.host,
         port: opts.port,
@@ -52,4 +56,4 @@ export function createClient(opts: IcreateClientOpts = {}): Client {
     });
     return myclient;
 }
-export var createConnection = createClient;
+// export var createConnection = createClient;

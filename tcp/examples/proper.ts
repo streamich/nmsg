@@ -1,23 +1,6 @@
-
-## Usage
-
-A basic *echo* example:
-
-```js
 import * as tcp from '../tcp';
 
-tcp.createServer(8080).start().api.add({
-    echo: (msg, callback) => { callback(msg);},
-});
 
-tcp.createClient(8080).start().router.emit('echo', 'Hello world', (msg) => {
-    console.log(msg); // Hello world
-});
-```
-
-All-you-need-to-know in one long example:
-
-```js
 // Create `nmsg-tcp` server.
 var server = tcp.createServer({
     host: '0.0.0.0', // Listen to all incoming IPs.
@@ -104,4 +87,3 @@ setTimeout(() => {
     server.stop();
     client.stop();
 }, 1000);
-```

@@ -1,7 +1,7 @@
-import {extend} from '../node_modules/nmsg/src/util';
+import {extend} from '../core/util';
 import {Msgpack as Serializer} from './serialize';
-import * as transport from '../node_modules/nmsg/src/transport';
-import * as backoff from '../node_modules/nmsg/src/backoff';
+import * as transport from '../core/transport';
+import * as backoff from '../core/backoff';
 import * as stream from './stream';
 import * as net from 'net';
 
@@ -10,8 +10,7 @@ export class ConnectionTcp extends transport.Connection {
     protected 'in': stream.LPDecoderStream;
     protected out:  stream.LPEncoderStream;
 
-    constructor(socket: net.Socket) {
-        super();
+    setSocket(socket: net.Socket) {
         this.out = new stream.LPEncoderStream(socket);
         this.in = new stream.LPDecoderStream(socket);
         this.in.on('data', (buf: Buffer) => {
@@ -43,6 +42,8 @@ export class TransportTcp extends transport.Transport {
 
     protected server: net.Server;
 
+    ClassConnection = ConnectionTcp;
+
     opts: ITransportTcpOpts;
 
     constructor(opts: ITransportTcpOpts) {
@@ -53,8 +54,8 @@ export class TransportTcp extends transport.Transport {
         this.server = net.createServer();
 
         this.server.on('connection', (socket: net.Socket) => {
-            var conn = new ConnectionTcp(socket);
-            conn.serializer = this.opts.serializer;
+            var conn = this.createConncetion() as ConnectionTcp;
+            conn.setSocket(socket);
             this.onconnection(conn);
         });
 
@@ -63,7 +64,7 @@ export class TransportTcp extends transport.Transport {
             this.server.close();
             error();
         });
-        this.server.on('stop', () => { this.onstop(); });
+        this.server.on('close', () => { this.onstop(); });
 
         this.server.listen({
             host: this.opts.host,

@@ -1,23 +1,27 @@
 "use strict";
 var server_1 = require('./server');
 var client_1 = require('./client');
-var server_2 = require('../node_modules/nmsg/src/server');
-var client_2 = require('../node_modules/nmsg/src/client');
+var server_2 = require('../core/server');
+var client_2 = require('../core/client');
 var serialize_1 = require('./serialize');
-var backoff_1 = require('../node_modules/nmsg/src/backoff');
-function fill_opts(opts) {
+var backoff_1 = require('../core/backoff');
+function fill_opts(opts, host) {
+    if (host === void 0) { host = '0.0.0.0'; }
+    if (typeof opts === 'number')
+        opts = { port: opts };
     if (!opts.host)
-        opts.host = '127.0.0.1';
+        opts.host = host;
     if (!opts.port)
         opts.port = 8080;
     if (!opts.serializer)
         opts.serializer = new serialize_1.Msgpack;
     if (!opts.backoff)
         opts.backoff = new backoff_1.BackoffExponential;
+    return opts;
 }
 function createServer(opts) {
     if (opts === void 0) { opts = {}; }
-    fill_opts(opts);
+    opts = fill_opts(opts);
     var topts = {
         host: opts.host,
         port: opts.port,
@@ -32,7 +36,7 @@ function createServer(opts) {
 exports.createServer = createServer;
 function createClient(opts) {
     if (opts === void 0) { opts = {}; }
-    fill_opts(opts);
+    opts = fill_opts(opts, '127.0.0.1');
     var topts = {
         host: opts.host,
         port: opts.port,
@@ -45,4 +49,4 @@ function createClient(opts) {
     return myclient;
 }
 exports.createClient = createClient;
-exports.createConnection = createClient;
+// export var createConnection = createClient;

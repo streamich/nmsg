@@ -26,6 +26,7 @@ var Transport = (function () {
     Transport.prototype.createConncetion = function () {
         var connection = new this.ClassConnection;
         connection.transport = this;
+        connection.serializer = this.opts.serializer;
         return connection;
     };
     Transport.prototype.serialize = function (message) {

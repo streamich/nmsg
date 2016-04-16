@@ -6,14 +6,24 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 var util_1 = require('./util');
 var server = require('./server');
+var rpc = require('../rpc/rpc');
 var Client = (function (_super) {
     __extends(Client, _super);
-    function Client() {
-        _super.apply(this, arguments);
+    function Client(opts) {
+        var _this = this;
+        if (opts === void 0) { opts = {}; }
+        _super.call(this, opts);
+        this.router = new rpc.Router;
         this.onmessage = util_1.noop;
+        this.opts.transport.onmessage = function (msg) {
+            _this.onmessage(msg);
+            _this.router.onmessage(msg);
+        };
+        this.router.send = this.send.bind(this);
     }
     Client.prototype.send = function (message) {
         this.opts.transport.send(message);
+        return this;
     };
     return Client;
 }(server.Server));

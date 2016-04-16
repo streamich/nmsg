@@ -1,4 +1,4 @@
-import * as mock from '../src/mock';
+import * as mock from '../mock';
 
 var server = mock.createServer();
 var client = mock.createClient();

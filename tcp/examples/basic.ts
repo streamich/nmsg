@@ -1,27 +1,9 @@
-import * as tcp from '../src/tcp';
+import * as tcp from '../tcp';
 
+tcp.createServer(8080).start().api.add({
+    echo: (msg, callback) => { callback(msg); },
+});
 
-var opts = {
-    host: '127.0.0.1',
-    port: 9999,
-};
-
-var server = tcp.createServer(opts);
-server.onstart = () => { console.log('started'); };
-server.onsocket = (socket) => {
-    socket.onmessage = (msg) => {
-        console.log('msg', msg);
-    };
-};
-server.start();
-
-var client = tcp.createClient(opts);
-client.onstart = () => {
-    console.log('connected');
-    client.send('test');
-};
-client.start();
-
-
-
-
+tcp.createClient(8080).start().router.emit('echo', 'Hello world', (msg) => {
+    console.log(msg);
+});

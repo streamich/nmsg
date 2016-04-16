@@ -51,6 +51,21 @@ In this example we send the `ping` event even before the server has been started
 
 *TypeScript* type definitions available in [./nmsg.d.ts](./nmsg.d.ts).
 
+## Reference
+
+### `core.Server`
+
+#### .onsocket = (socket: core.Socket) => void;
+
+A mechanism for receiving new sockets, you have to implement this property method. 
+
+### `core.Socket`
+
+
+
+### `core.Client`
+
+
 ## Developing
 
 Getting started:

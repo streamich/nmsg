@@ -1,6 +1,6 @@
-/// <reference path="./typing.d.ts" />
+/// <reference path="../../typings/test.d.ts" />
 import {expect} from 'chai';
-import * as backoff from '../src/backoff';
+import * as backoff from '../backoff';
 
 
 describe('backoff', function() {

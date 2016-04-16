@@ -2,17 +2,19 @@ import {extend, noop} from './util';
 import * as transport from './transport';
 import * as serialize from './serialize';
 import * as backoff from './backoff';
+import * as rpc from '../rpc/rpc';
 
 
 export type TMessage                    = serialize.TUnpacked;
-export type TcallbackOnSocketMessage    = (message: TMessage, socket: ISocket) => void;
+export type TcallbackOnSocketMessage    = (message: TMessage, socket?: ISocket) => void;
 export type TcallbackOnSocket           = (socket: ISocket) => void;
 export type TcallbackWiretapServer      = (message: TMessage, socket: ISocket) => void;
 
 
 export interface ISocket {
+    router: rpc.Router;
     onmessage: TcallbackOnSocketMessage;
-    send(msg: TMessage);
+    send(msg: TMessage): this;
 }
 
 export interface IServerOpts {
@@ -21,6 +23,7 @@ export interface IServerOpts {
 }
 
 export interface IServer {
+    api: rpc.Api;
     onsocket:   TcallbackOnSocket;
     onstart:    transport.TcallbackOnStart;
     onstop:     transport.TcallbackOnStop;
@@ -35,14 +38,22 @@ export class Socket implements ISocket {
 
     protected connection: transport.Connection;
 
-    onmessage: TcallbackOnSocketMessage = noop;
+    router = new rpc.Router;
+
+    onmessage: TcallbackOnSocketMessage = noop as TcallbackOnSocketMessage;
 
     constructor(connection: transport.Connection) {
         this.connection = connection;
+        this.connection.onmessage = (msg) => {
+            this.onmessage(msg, this);
+            this.router.onmessage(msg);
+        };
+        this.router.send = this.send.bind(this);
     }
 
-    send(message: TMessage) {
+    send(message: TMessage): this {
         this.connection.send(message);
+        return this;
     }
 }
 
@@ -51,6 +62,8 @@ export class Server implements IServer {
     protected transport: transport.Transport;
 
     protected opts: IServerOpts = {};
+
+    api = new rpc.Api;
 
     onsocket:   TcallbackOnSocket = noop;
     onstart:    transport.TcallbackOnStart = noop;
@@ -62,14 +75,15 @@ export class Server implements IServer {
     }
 
     protected createSocket(connection) {
-        return new Socket(connection)
+        var socket = new Socket(connection);
+        socket.router.setApi(this.api);
+        return socket;
     }
 
     protected tryStart(success: backoff.TcallbackSuccess, error: backoff.TcallbackError) {
         var transport = this.opts.transport;
         transport.onconnection = (connection) => {
-            var socket = this.createSocket(connection);
-            this.onsocket(socket);
+            this.onsocket(this.createSocket(connection));
         };
 
         // Do NOT do just `transport.onstart = this.onstart;`

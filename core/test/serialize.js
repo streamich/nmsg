@@ -1,7 +1,7 @@
 "use strict";
-/// <reference path="./typing.d.ts" />
+/// <reference path="../../typings/test.d.ts" />
 var chai_1 = require('chai');
-var serialize = require('../src/serialize');
+var serialize = require('../serialize');
 describe('serialize', function () {
     describe('Json', function () {
         var serializer = new serialize.Json;

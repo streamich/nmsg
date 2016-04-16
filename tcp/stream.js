@@ -82,3 +82,11 @@ var LPDecoderStream = (function (_super) {
     return LPDecoderStream;
 }(stream_1.Transform));
 exports.LPDecoderStream = LPDecoderStream;
+var Buffered = (function (_super) {
+    __extends(Buffered, _super);
+    function Buffered() {
+        _super.apply(this, arguments);
+    }
+    return Buffered;
+}(stream_1.Transform));
+exports.Buffered = Buffered;
