@@ -1,8 +1,7 @@
 require('dts-generator').default({
-    name: 'nmsg',
-    // main: 'nmsg',
+    name: 'nmsg-tcp',
     project: './src',
-    out: 'nmsg.d.ts',
+    out: 'nmsg-tcp.d.ts',
     excludes: [
         "node_modules/**/*.d.ts",
         "typings/**/*.d.ts",

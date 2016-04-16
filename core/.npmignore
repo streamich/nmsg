@@ -1,5 +1,5 @@
-.idea/
 /typings
+/scripts
 /examples
 tsconfig.json
 nmsg-rpc.d.ts

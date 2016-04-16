@@ -1,0 +1,32 @@
+{
+  "version": "1.0.7",
+  "name": "nmsg-rpc",
+  "description": "RPC event based router for JavaScript bi-directional messaging",
+  "main": "src/rpc.js",
+  "keywords": [
+    "nmsg",
+    "rpc",
+    "nmsg-rpc",
+    "node-messenger",
+    "messenger",
+    "ipc",
+    "inter-process",
+    "communication",
+    "scoket",
+    "websocket",
+    "sockjs",
+    "socket.io"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/streamich/nmsg-rpc/"
+  },
+  "scripts": {
+    "mypublish": "npm run dist && npm run typing && git add -A && git commit -m \"Publishing\" && npm version patch && git push -u origin master && npm publish",
+    "typing": "node ./dts.js",
+    "test": "mocha",
+    "dist-build": "webpack",
+    "dist-min": "uglifyjs dist/nmsg-rpc.js -o dist/nmsg-rpc.min.js --compress --mangle --source-map dist/nmsg-rpc.min.js.map",
+    "dist": "npm run dist-build && npm run dist-min"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "version": "1.0.2",
+  "name": "nmsg",
+  "description": "Generic client-server messenger",
+  "main": "export.js",
+  "keywords": [
+    "nmsg",
+    "node-messenger",
+    "messenger",
+    "ipc",
+    "inter-process",
+    "communication",
+    "scoket",
+    "websocket",
+    "sockjs",
+    "socket.io"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/streamich/nmsg-core"
+  },
+  "scripts": {
+    "mypublish": "npm run typing && git add -A && git commit -m \"Publishing\" && npm version patch && git push -u origin master && npm publish",
+    "typing": "node ./dts.js",
+    "test": "mocha"
+  }
+}

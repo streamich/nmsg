@@ -1,0 +1,7 @@
+
+
+
+Installation:
+
+    npm i ../nmsg
+    
