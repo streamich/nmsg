@@ -1,13 +1,12 @@
-import {extend} from '../core/util';
-import {Msgpack as Serializer} from './serialize';
-import * as transport from '../core/transport';
-import * as backoff from '../core/backoff';
+import {extend} from '../nmsg-core/util';
+import * as transport from '../nmsg-core/transport';
+import * as backoff from '../nmsg-core/backoff';
 import * as stream from './stream';
 import * as net from 'net';
-import {Server, IServerOpts} from '../core/server';
-import {ISerializer} from '../core/serialize';
+import {Server, IServerOpts} from '../nmsg-core/server';
+import {ISerializer} from '../nmsg-core/serialize';
 import {Msgpack as Serializer} from './serialize';
-import {BackoffExponential as Backoff, IBackoff} from '../core/backoff';
+import {BackoffExponential as Backoff, IBackoff} from '../nmsg-core/backoff';
 
 
 export class ConnectionTcp extends transport.Connection {

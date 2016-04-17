@@ -2,7 +2,7 @@ import {noop} from './util';
 import * as server from './server';
 import * as transport from './transport';
 import * as backoff from './backoff';
-import * as rpc from '../rpc/rpc';
+import * as rpc from '../nmsg-rpc/rpc';
 import {Queue} from './queue';
 
 

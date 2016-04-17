@@ -6,7 +6,7 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 var util_1 = require('./util');
 var server = require('./server');
-var rpc = require('../rpc/rpc');
+var rpc = require('../nmsg-rpc/rpc');
 var queue_1 = require('./queue');
 var Client = (function (_super) {
     __extends(Client, _super);

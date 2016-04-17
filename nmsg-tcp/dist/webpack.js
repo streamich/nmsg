@@ -62,11 +62,11 @@
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
 	var util_1 = __webpack_require__(2);
-	var serialize_1 = __webpack_require__(3);
-	var transport = __webpack_require__(5);
-	var stream = __webpack_require__(6);
-	var net = __webpack_require__(8);
-	var server_1 = __webpack_require__(9);
+	var transport = __webpack_require__(3);
+	var stream = __webpack_require__(4);
+	var net = __webpack_require__(6);
+	var server_1 = __webpack_require__(7);
+	var serialize_1 = __webpack_require__(10);
 	var backoff_1 = __webpack_require__(12);
 	var ConnectionTcp = (function (_super) {
 	    __extends(ConnectionTcp, _super);
@@ -175,33 +175,6 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Msgpack = (function () {
-	    function Msgpack() {
-	    }
-	    Msgpack.prototype.pack = function (data) {
-	        var msgpack = __webpack_require__(4);
-	        return msgpack.encode(data);
-	    };
-	    Msgpack.prototype.unpack = function (data) {
-	        var msgpack = __webpack_require__(4);
-	        return msgpack.decode(data);
-	    };
-	    return Msgpack;
-	}());
-	exports.Msgpack = Msgpack;
-
-
-/***/ },
-/* 4 */
-/***/ function(module, exports) {
-
-	module.exports = require("msgpack-lite");
-
-/***/ },
-/* 5 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
 	var __extends = (this && this.__extends) || function (d, b) {
 	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
 	    function __() { this.constructor = d; }
@@ -253,7 +226,7 @@
 
 
 /***/ },
-/* 6 */
+/* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -262,7 +235,7 @@
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	var stream_1 = __webpack_require__(7);
+	var stream_1 = __webpack_require__(5);
 	// Lenght-prefixed encoder, where each message gets prepended a 4-byte length value.
 	var LPEncoder = (function () {
 	    function LPEncoder() {
@@ -354,24 +327,24 @@
 
 
 /***/ },
-/* 7 */
+/* 5 */
 /***/ function(module, exports) {
 
 	module.exports = require("stream");
 
 /***/ },
-/* 8 */
+/* 6 */
 /***/ function(module, exports) {
 
 	module.exports = require("net");
 
 /***/ },
-/* 9 */
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 	var util_1 = __webpack_require__(2);
-	var rpc = __webpack_require__(10);
+	var rpc = __webpack_require__(8);
 	var Socket = (function () {
 	    function Socket(connection) {
 	        var _this = this;
@@ -445,7 +418,7 @@
 
 
 /***/ },
-/* 10 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -454,7 +427,7 @@
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	var util_1 = __webpack_require__(11);
+	var util_1 = __webpack_require__(9);
 	// export interface IFrameDataBuffered {
 	// b: FrameList; // B for bulk.
 	// [i: number]: FrameList;
@@ -655,10 +628,11 @@
 	    //     return this.subs[event];
 	    // }
 	    Router.prototype.pub = function (frame) {
-	        var event = frame.event;
+	        var event = frame.event, args = frame.args;
 	        if (!event)
 	            return;
-	        var args = frame.args;
+	        if (this.onevent)
+	            this.onevent(event, args);
 	        var method;
 	        if (this.api)
 	            method = this.api.get(event);
@@ -808,7 +782,7 @@
 
 
 /***/ },
-/* 11 */
+/* 9 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -827,6 +801,33 @@
 	}
 	exports.extend = extend;
 
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var Msgpack = (function () {
+	    function Msgpack() {
+	    }
+	    Msgpack.prototype.pack = function (data) {
+	        var msgpack = __webpack_require__(11);
+	        return msgpack.encode(data);
+	    };
+	    Msgpack.prototype.unpack = function (data) {
+	        var msgpack = __webpack_require__(11);
+	        return msgpack.decode(data);
+	    };
+	    return Msgpack;
+	}());
+	exports.Msgpack = Msgpack;
+
+
+/***/ },
+/* 11 */
+/***/ function(module, exports) {
+
+	module.exports = require("msgpack-lite");
 
 /***/ },
 /* 12 */
@@ -900,11 +901,11 @@
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
 	var util_1 = __webpack_require__(2);
-	var transport = __webpack_require__(5);
-	var stream = __webpack_require__(6);
-	var net = __webpack_require__(8);
+	var transport = __webpack_require__(3);
+	var stream = __webpack_require__(4);
+	var net = __webpack_require__(6);
 	var client_1 = __webpack_require__(14);
-	var serialize_1 = __webpack_require__(3);
+	var serialize_1 = __webpack_require__(10);
 	var backoff_1 = __webpack_require__(12);
 	var ClientTransportTcp = (function (_super) {
 	    __extends(ClientTransportTcp, _super);
@@ -994,8 +995,8 @@
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
 	var util_1 = __webpack_require__(2);
-	var server = __webpack_require__(9);
-	var rpc = __webpack_require__(10);
+	var server = __webpack_require__(7);
+	var rpc = __webpack_require__(8);
 	var queue_1 = __webpack_require__(15);
 	var Client = (function (_super) {
 	    __extends(Client, _super);

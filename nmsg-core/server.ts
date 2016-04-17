@@ -2,7 +2,7 @@ import {extend, noop} from './util';
 import * as transport from './transport';
 import * as serialize from './serialize';
 import * as backoff from './backoff';
-import * as rpc from '../rpc/rpc';
+import * as rpc from '../nmsg-rpc/rpc';
 
 
 export type TMessage                    = serialize.TUnpacked;

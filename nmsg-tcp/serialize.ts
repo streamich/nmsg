@@ -1,4 +1,4 @@
-import * as serialize from '../core/serialize';
+import * as serialize from '../nmsg-core/serialize';
 
 
 export class Msgpack implements serialize.ISerializer {

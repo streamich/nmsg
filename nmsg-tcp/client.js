@@ -4,13 +4,13 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var util_1 = require('../core/util');
-var transport = require('../core/transport');
+var util_1 = require('../nmsg-core/util');
+var transport = require('../nmsg-core/transport');
 var stream = require('./stream');
 var net = require('net');
-var client_1 = require('../core/client');
+var client_1 = require('../nmsg-core/client');
 var serialize_1 = require('./serialize');
-var backoff_1 = require('../core/backoff');
+var backoff_1 = require('../nmsg-core/backoff');
 var ClientTransportTcp = (function (_super) {
     __extends(ClientTransportTcp, _super);
     function ClientTransportTcp(opts) {

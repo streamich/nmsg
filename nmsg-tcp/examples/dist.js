@@ -1,4 +1,4 @@
-var tcp = require('../dist/index.min');
+var tcp = require('../dist/nmsg-tcp.min');
 
 tcp.createServer(8080).start().api.add({
         echo: function(msg, callback) { callback(msg); }

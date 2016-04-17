@@ -1,6 +1,6 @@
 "use strict";
 var util_1 = require('./util');
-var rpc = require('../rpc/rpc');
+var rpc = require('../nmsg-rpc/rpc');
 var Socket = (function () {
     function Socket(connection) {
         var _this = this;

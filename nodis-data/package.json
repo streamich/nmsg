@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "speedr": "0.3.1"
+    "speedr": "0.3.1",
+    "nmsg-tcp": "*"
   }
 }

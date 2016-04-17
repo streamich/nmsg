@@ -32,7 +32,7 @@ declare module 'nmsg-tcp/stream' {
 
 }
 declare module 'nmsg-tcp/serialize' {
-	import * as serialize from 'core/serialize';
+	import * as serialize from 'nmsg-core/serialize';
 	export class Msgpack implements serialize.ISerializer {
 	    pack(data: serialize.TUnpacked): serialize.TPacked;
 	    unpack(data: serialize.TPacked): serialize.TUnpacked;
@@ -40,14 +40,14 @@ declare module 'nmsg-tcp/serialize' {
 
 }
 declare module 'nmsg-tcp/client' {
-	import { TMessage } from 'core/server';
-	import * as transport from 'core/transport';
-	import * as backoff from 'core/backoff';
+	import { TMessage } from 'nmsg-core/server';
+	import * as transport from 'nmsg-core/transport';
+	import * as backoff from 'nmsg-core/backoff';
 	import * as stream from 'nmsg-tcp/stream';
 	import * as net from 'net';
-	import { Client } from 'core/client';
-	import { ISerializer } from 'core/serialize';
-	import { IBackoff } from 'core/backoff';
+	import { Client } from 'nmsg-core/client';
+	import { ISerializer } from 'nmsg-core/serialize';
+	import { IBackoff } from 'nmsg-core/backoff';
 	export interface IClientTransportTcpOpts extends transport.ITransportOpts {
 	    host?: string;
 	    port?: number;
@@ -76,13 +76,13 @@ declare module 'nmsg-tcp/client' {
 
 }
 declare module 'nmsg-tcp/server' {
-	import * as transport from 'core/transport';
-	import * as backoff from 'core/backoff';
+	import * as transport from 'nmsg-core/transport';
+	import * as backoff from 'nmsg-core/backoff';
 	import * as stream from 'nmsg-tcp/stream';
 	import * as net from 'net';
-	import { Server } from 'core/server';
-	import { ISerializer } from 'core/serialize';
-	import { IBackoff } from 'core/backoff';
+	import { Server } from 'nmsg-core/server';
+	import { ISerializer } from 'nmsg-core/serialize';
+	import { IBackoff } from 'nmsg-core/backoff';
 	export class ConnectionTcp extends transport.Connection {
 	    protected 'in': stream.LPDecoderStream;
 	    protected out: stream.LPEncoderStream;
