@@ -18,6 +18,7 @@ declare namespace speedr {
         length: number;
         set(values: KeyValueTuple|KeyValueMap);
         get(key: string): any;
+        remove(key: string): number;
         iter(index: number): KeyValueTuple;
     }
 }

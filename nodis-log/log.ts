@@ -46,7 +46,9 @@ export class LineWriter {
 
     static createFromFile(path) {
         var writer = new LineWriter;
-        writer.stream = fs.createWriteStream(path);
+        writer.stream = fs.createWriteStream(path, {
+            flags: 'a',
+        });
         return writer;
     }
 

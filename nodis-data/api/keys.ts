@@ -20,3 +20,21 @@ export var set = function(key: string, value: any, opts?: IsetOpts, callback?: I
     core.storage.key.map.set([key, value]);
     return true; // Log this command.
 };
+
+
+export var get = function(key: string, callback: IApiCallback) {
+    if(typeof callback !== 'function') return;
+
+    var core = this as Core;
+    callback(null, core.storage.key.map.get(key));
+};
+
+
+export var del = function(key: string, callback: IApiCallback = noop) {
+    if(typeof callback !== 'function') return;
+
+    var core = this as Core;
+    var map = core.storage.key.map;
+    callback(null, map.length != map.remove(key));
+    return true;
+};

@@ -1,1 +1,1 @@
-export {createClient, IcreateClientOpts} from '../tcp/client';
+export {createClient, IcreateClientOpts} from '../nmsg-tcp/client';

@@ -1,12 +1,22 @@
 import {Readable} from 'stream';
-import * as speedr from 'speedr';
+import {Map} from './stl';
 
 
-export type TSerializable = any;
+
+// Optional object that associates meta data with keys, such as TTL, expiry timers.
+interface IKeyMeta {
+    ttl?: number;
+}
 
 
 export class Keys {
-    map = new speedr.Map;
+    map = new Map;
+    meta: {[key: string]: IKeyMeta} = {};
+
+    deleteMeta(key: string) {
+        // TODO: clear timers
+        delete this.meta[key];
+    }
 }
 
 

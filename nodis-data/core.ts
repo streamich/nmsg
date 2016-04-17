@@ -6,10 +6,14 @@ export type TArgument = any;
 export type TArgumentList = TArgument[];
 export type TCommand = [string, TArgumentList];
 
-// export interface ICommand {
-//     cmd: string;
-//     args: any[];
-// }
+export interface IaofWriter {
+    write(obj: any);
+}
+
+
+export interface ICoreOpts {
+    aof: IaofWriter;
+}
 
 
 export class Core {
@@ -17,6 +21,14 @@ export class Core {
     storage = new store.Storage;
 
     api: api.TCommandList;
+
+    opts: ICoreOpts = {
+        aof: null,
+    };
+
+    constructor(opts: ICoreOpts) {
+        this.opts = opts;
+    }
     
     exec(command: TCommand) {
         var [cmd, args] = command;
@@ -34,6 +46,10 @@ export class Core {
         }
 
         var do_log = this.api[cmd].apply(this, args);
+
+        // Remove the last callback argument, if any, as we don't need it anymore.
+        if(args.length && (typeof args[args.length - 1] === 'function')) args.splice(args.length - 1, 1);
+
         if(do_log) this.log(command);
     }
 
@@ -43,7 +59,7 @@ export class Core {
     }
 
     log(command: TCommand) {
-        
+        this.opts.aof.write(command);
     }
 }
 

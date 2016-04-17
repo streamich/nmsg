@@ -1,12 +1,12 @@
 "use strict";
 var store = require('./store');
-// export interface ICommand {
-//     cmd: string;
-//     args: any[];
-// }
 var Core = (function () {
-    function Core() {
+    function Core(opts) {
         this.storage = new store.Storage;
+        this.opts = {
+            aof: null
+        };
+        this.opts = opts;
     }
     Core.prototype.exec = function (command) {
         var cmd = command[0], args = command[1];
@@ -21,6 +21,9 @@ var Core = (function () {
             return;
         }
         var do_log = this.api[cmd].apply(this, args);
+        // Remove the last callback argument, if any, as we don't need it anymore.
+        if (args.length && (typeof args[args.length - 1] === 'function'))
+            args.splice(args.length - 1, 1);
         if (do_log)
             this.log(command);
     };
@@ -30,6 +33,7 @@ var Core = (function () {
         this.api = api;
     };
     Core.prototype.log = function (command) {
+        this.opts.aof.write(command);
     };
     return Core;
 }());

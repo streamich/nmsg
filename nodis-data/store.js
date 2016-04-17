@@ -5,11 +5,16 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var stream_1 = require('stream');
-var speedr = require('speedr');
+var stl_1 = require('./stl');
 var Keys = (function () {
     function Keys() {
-        this.map = new speedr.Map;
+        this.map = new stl_1.Map;
+        this.meta = {};
     }
+    Keys.prototype.deleteMeta = function (key) {
+        // TODO: clear timers
+        delete this.meta[key];
+    };
     return Keys;
 }());
 exports.Keys = Keys;
