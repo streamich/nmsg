@@ -2,7 +2,7 @@
   "version": "1.0.0",
   "name": "nmsg",
   "description": "TCP transport for nmsg",
-  "main": "dist/nmsg-tcp.js",
+  "main": "dist/index.min.js",
   "keywords": [
     "nmsg",
     "nmsg-tcp",
@@ -25,7 +25,10 @@
   "scripts": {
     "mypublish": "npm run typing && git add -A && git commit -m \"Publishing\" && npm version patch && git push -u origin master && npm publish",
     "typing": "node ./dts.js",
-    "test": "mocha"
+    "test": "mocha",
+    "dist-build": "webpack && echo module.exports= | cat - dist/webpack.js > dist/index.js",
+    "dist-min": "uglifyjs dist/index.js -o dist/index.min.js --compress --mangle",
+    "dist": "npm run dist-build && npm run dist-min"
   },
   "dependencies": {
     "msgpack-lite": "0.1.17"

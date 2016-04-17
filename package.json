@@ -29,6 +29,7 @@
   "devDependencies": {
     "dts-generator": "1.7.0",
     "chai": "*",
-    "webpack": "*"
+    "webpack": "*",
+    "webpack-node-externals": "1.0.0"
   }
 }
