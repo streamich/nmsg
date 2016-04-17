@@ -24,7 +24,7 @@ server.api.add({
 // Deal with each connected socket individually.
 server.onsocket = function (socket) {
     // Define callbacks for each socket individually.
-    // (P.S. on server better use `server.api.add`).
+    // (P.S. on server, better use `server.api.add`).
     socket.router.on('hello', function () {
         console.log('Hello world');
     });

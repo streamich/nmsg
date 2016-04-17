@@ -8,13 +8,14 @@ var util_1 = require('../core/util');
 var transport = require('../core/transport');
 var stream = require('./stream');
 var net = require('net');
+var client_1 = require('../core/client');
+var serialize_1 = require('./serialize');
+var backoff_1 = require('../core/backoff');
 var ClientTransportTcp = (function (_super) {
     __extends(ClientTransportTcp, _super);
     function ClientTransportTcp(opts) {
         if (opts === void 0) { opts = {}; }
         _super.call(this, util_1.extend({}, ClientTransportTcp.defaults, opts));
-        // This allows to "write" to socket, even before its connected.
-        this.createStreams();
     }
     ClientTransportTcp.prototype.createStreams = function () {
         var _this = this;
@@ -26,19 +27,16 @@ var ClientTransportTcp = (function (_super) {
     };
     ClientTransportTcp.prototype.start = function (success, error) {
         var _this = this;
-        if (!this.socket)
-            this.createStreams();
+        this.createStreams();
         this.out.pipe(this.socket);
         this.socket.pipe(this.in);
         this.in.on('data', this.onMessage.bind(this));
         this.socket
             .on('error', function (err) {
-            _this.socket = null;
             _this.onerror(err);
             error();
         })
             .on('close', function () {
-            _this.socket = null;
             _this.onstop();
         })
             .connect(this.opts.port, this.opts.host, function () {
@@ -70,3 +68,21 @@ var ClientTransportTcp = (function (_super) {
     return ClientTransportTcp;
 }(transport.ClientTransport));
 exports.ClientTransportTcp = ClientTransportTcp;
+function createClient(opts) {
+    if (opts === void 0) { opts = {}; }
+    var myopts = ((typeof opts === 'number') ? { port: opts } : opts);
+    // Transport options.
+    var topts = {
+        host: myopts.host || '127.0.0.1',
+        port: myopts.port || 8080,
+        serializer: myopts.serializer || new serialize_1.Msgpack
+    };
+    // Client options.
+    var copts = {
+        transport: new ClientTransportTcp(topts),
+        backoff: myopts.backoff || new backoff_1.BackoffExponential,
+        queue: myopts.queue || 1000
+    };
+    return new client_1.Client(copts);
+}
+exports.createClient = createClient;

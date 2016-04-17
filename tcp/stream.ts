@@ -95,6 +95,12 @@ export class LPDecoderStream extends Transform {
 
 export class Buffered extends Transform {
 
-    
+    constructor() {
+        super();
+    }
+
+    _transform(chunk: Buffer|string, encoding: string, callback: (err?, data?) => void) {
+        callback();
+    }
 
 }

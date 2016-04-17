@@ -63,6 +63,8 @@ export class Server implements IServer {
 
     protected opts: IServerOpts = {};
 
+    isStarted = false;
+
     api = new rpc.Api;
 
     onsocket:   TcallbackOnSocket = noop;
@@ -80,16 +82,31 @@ export class Server implements IServer {
         return socket;
     }
 
+    protected onStart() {
+        this.isStarted = true;
+        this.onstart();
+    }
+
+    protected onStop() {
+        this.isStarted = false;
+        this.onstop();
+    }
+
+    protected onError(err) {
+        // TODO: handle various types of errors, start/stop/ reconnect logic, queue drain etc...
+        this.onerror(err);
+    }
+
+    protected onConnection(connection) {
+        this.onsocket(this.createSocket(connection));
+    }
+
     protected tryStart(success: backoff.TcallbackSuccess, error: backoff.TcallbackError) {
         var transport = this.opts.transport;
-        transport.onconnection = (connection) => {
-            this.onsocket(this.createSocket(connection));
-        };
-
-        // Do NOT do just `transport.onstart = this.onstart;`
-        transport.onstart   = () => { this.onstart(); };
-        transport.onstop    = () => { this.onstop(); };
-        transport.onerror   = (err) => { this.onerror(err); };
+        transport.onconnection  = this.onConnection.bind(this);
+        transport.onstart       = this.onStart.bind(this);
+        transport.onstop        = this.onStop.bind(this);
+        transport.onerror       = this.onError.bind(this);
         transport.start(success, error);
     }
 

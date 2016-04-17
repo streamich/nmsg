@@ -9,6 +9,8 @@ var serialize_1 = require('./serialize');
 var transport = require('../core/transport');
 var stream = require('./stream');
 var net = require('net');
+var server_1 = require('../core/server');
+var backoff_1 = require('../core/backoff');
 var ConnectionTcp = (function (_super) {
     __extends(ConnectionTcp, _super);
     function ConnectionTcp() {
@@ -69,3 +71,20 @@ var TransportTcp = (function (_super) {
     return TransportTcp;
 }(transport.Transport));
 exports.TransportTcp = TransportTcp;
+function createServer(opts) {
+    if (opts === void 0) { opts = {}; }
+    var myopts = ((typeof opts === 'number') ? { port: opts } : opts);
+    // Transport options.
+    var topts = {
+        host: myopts.host || '0.0.0.0',
+        port: myopts.port || 8080,
+        serializer: myopts.serializer || new serialize_1.Msgpack
+    };
+    // Server options.
+    var sopts = {
+        transport: new TransportTcp(topts),
+        backoff: opts.backoff || new backoff_1.BackoffExponential
+    };
+    return new server_1.Server(sopts);
+}
+exports.createServer = createServer;

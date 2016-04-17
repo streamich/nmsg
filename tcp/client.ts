@@ -4,6 +4,10 @@ import * as transport from '../core/transport';
 import * as backoff from '../core/backoff';
 import * as stream from './stream';
 import * as net from 'net';
+import {Client, IClientOpts} from '../core/client';
+import {ISerializer} from '../core/serialize';
+import {Msgpack as Serializer} from './serialize';
+import {BackoffExponential as Backoff, IBackoff} from '../core/backoff';
 
 
 export interface IClientTransportTcpOpts extends transport.ITransportOpts {
@@ -27,9 +31,6 @@ export class ClientTransportTcp extends transport.ClientTransport {
     
     constructor(opts: IClientTransportTcpOpts = {}) {
         super(extend<any>({}, ClientTransportTcp.defaults, opts));
-
-        // This allows to "write" to socket, even before its connected.
-        this.createStreams();
     }
 
     protected createStreams() {
@@ -41,19 +42,18 @@ export class ClientTransportTcp extends transport.ClientTransport {
     }
 
     start(success: backoff.TcallbackSuccess, error: backoff.TcallbackError) {
-        if(!this.socket) this.createStreams();
+        this.createStreams();
+
         this.out.pipe(this.socket);
         this.socket.pipe(this.in);
 
         this.in.on('data', this.onMessage.bind(this));
         this.socket
             .on('error', (err) => {
-                this.socket = null;
                 this.onerror(err);
                 error();
             })
             .on('close', () => {
-                this.socket = null;
                 this.onstop();
             })
             .connect(this.opts.port, this.opts.host, () => {
@@ -79,4 +79,32 @@ export class ClientTransportTcp extends transport.ClientTransport {
             this.onerror(err);
         }
     }
+}
+
+
+export interface IcreateClientOpts {
+    host?: string,
+    port?: number,
+    serializer?: ISerializer;
+    backoff?: IBackoff;
+    queue?: number;
+}
+
+export function createClient(opts: number|IcreateClientOpts = {}): Client {
+    var myopts: IcreateClientOpts = ((typeof opts === 'number') ? {port: opts} : opts) as IcreateClientOpts;
+
+    // Transport options.
+    var topts: IClientTransportTcpOpts = {
+        host: myopts.host || '127.0.0.1',
+        port: myopts.port || 8080,
+        serializer: myopts.serializer || new Serializer,
+    };
+
+    // Client options.
+    var copts: IClientOpts = {
+        transport: new ClientTransportTcp(topts),
+        backoff: myopts.backoff || new Backoff,
+        queue: myopts.queue || 1000,
+    };
+    return new Client(copts);
 }

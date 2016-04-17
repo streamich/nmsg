@@ -85,8 +85,11 @@ exports.LPDecoderStream = LPDecoderStream;
 var Buffered = (function (_super) {
     __extends(Buffered, _super);
     function Buffered() {
-        _super.apply(this, arguments);
+        _super.call(this);
     }
+    Buffered.prototype._transform = function (chunk, encoding, callback) {
+        callback();
+    };
     return Buffered;
 }(stream_1.Transform));
 exports.Buffered = Buffered;

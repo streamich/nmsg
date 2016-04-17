@@ -8,9 +8,9 @@ var server = tcp.createServer({
 });
 
 // Server managment.
-server.onerror = (err) => { console.log('Server error:', err); };
-server.onstop = () => { console.log('Server stopped.') };
-server.onstart = () => { console.log('Server started.') };
+server.onerror  = (err) => { console.log('Server error:', err); };
+server.onstop   = ()    => { console.log('Server stopped.') };
+server.onstart  = ()    => { console.log('Server started.') };
 
 // Define your server's API.
 server.api.add({
@@ -29,7 +29,7 @@ server.api.add({
 server.onsocket = (socket) => {
 
     // Define callbacks for each socket individually.
-    // (P.S. on server better use `server.api.add`).
+    // (P.S. on server, better use `server.api.add`).
     socket.router.on('hello', () => {
         console.log('Hello world');
     });
@@ -50,9 +50,9 @@ var client = tcp.createClient({
 });
 
 // Client managment.
-client.onerror = (err) => { console.log('Client error:', err); };
-client.onstop = () => { console.log('Client stopped.') };
-client.onstart = () => {
+client.onerror  = (err) => { console.log('Client error:', err); };
+client.onstop   = ()    => { console.log('Client stopped.') };
+client.onstart  = ()    => {
     console.log('Client started.');
 
     // Send messages to server, after we connected.

@@ -24,6 +24,7 @@ var Server = (function () {
     function Server(opts) {
         if (opts === void 0) { opts = {}; }
         this.opts = {};
+        this.isStarted = false;
         this.api = new rpc.Api;
         this.onsocket = util_1.noop;
         this.onstart = util_1.noop;
@@ -36,16 +37,27 @@ var Server = (function () {
         socket.router.setApi(this.api);
         return socket;
     };
+    Server.prototype.onStart = function () {
+        this.isStarted = true;
+        this.onstart();
+    };
+    Server.prototype.onStop = function () {
+        this.isStarted = false;
+        this.onstop();
+    };
+    Server.prototype.onError = function (err) {
+        // TODO: handle various types of errors, start/stop/ reconnect logic, queue drain etc...
+        this.onerror(err);
+    };
+    Server.prototype.onConnection = function (connection) {
+        this.onsocket(this.createSocket(connection));
+    };
     Server.prototype.tryStart = function (success, error) {
-        var _this = this;
         var transport = this.opts.transport;
-        transport.onconnection = function (connection) {
-            _this.onsocket(_this.createSocket(connection));
-        };
-        // Do NOT do just `transport.onstart = this.onstart;`
-        transport.onstart = function () { _this.onstart(); };
-        transport.onstop = function () { _this.onstop(); };
-        transport.onerror = function (err) { _this.onerror(err); };
+        transport.onconnection = this.onConnection.bind(this);
+        transport.onstart = this.onStart.bind(this);
+        transport.onstop = this.onStop.bind(this);
+        transport.onerror = this.onError.bind(this);
         transport.start(success, error);
     };
     Server.prototype.start = function () {

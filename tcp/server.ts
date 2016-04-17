@@ -4,6 +4,10 @@ import * as transport from '../core/transport';
 import * as backoff from '../core/backoff';
 import * as stream from './stream';
 import * as net from 'net';
+import {Server, IServerOpts} from '../core/server';
+import {ISerializer} from '../core/serialize';
+import {Msgpack as Serializer} from './serialize';
+import {BackoffExponential as Backoff, IBackoff} from '../core/backoff';
 
 
 export class ConnectionTcp extends transport.Connection {
@@ -78,4 +82,30 @@ export class TransportTcp extends transport.Transport {
     stop() {
         this.server.close();
     }
+}
+
+
+export interface IcreateServerOpts {
+    host?: string,
+    port?: number,
+    serializer?: ISerializer;
+    backoff?: IBackoff;
+}
+
+export function createServer(opts: IcreateServerOpts = {}): Server {
+    var myopts: IcreateServerOpts = ((typeof opts === 'number') ? {port: opts} : opts) as IcreateServerOpts;
+
+    // Transport options.
+    var topts: ITransportTcpOpts = {
+        host: myopts.host || '0.0.0.0',
+        port: myopts.port || 8080,
+        serializer: myopts.serializer || new Serializer,
+    };
+
+    // Server options.
+    var sopts: IServerOpts = {
+        transport: new TransportTcp(topts),
+        backoff: opts.backoff || new Backoff,
+    };
+    return new Server(sopts);
 }

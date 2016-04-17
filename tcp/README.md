@@ -4,20 +4,8 @@
 A basic *echo* example:
 
 ```js
-import * as tcp from '../tcp';
+import * as tcp from 'nmsg-tcp';
 
-tcp.createServer(8080).start().api.add({
-    echo: (msg, callback) => { callback(msg);},
-});
-
-tcp.createClient(8080).start().router.emit('echo', 'Hello world', (msg) => {
-    console.log(msg); // Hello world
-});
-```
-
-All-you-need-to-know in one long example:
-
-```js
 // Create `nmsg-tcp` server.
 var server = tcp.createServer({
     host: '0.0.0.0', // Listen to all incoming IPs.
@@ -25,9 +13,9 @@ var server = tcp.createServer({
 });
 
 // Server managment.
-server.onerror = (err) => { console.log('Server error:', err); };
-server.onstop = () => { console.log('Server stopped.') };
-server.onstart = () => { console.log('Server started.') };
+server.onerror  = (err) => { console.log('Server error:', err); };
+server.onstop   = ()    => { console.log('Server stopped.') };
+server.onstart  = ()    => { console.log('Server started.') };
 
 // Define your server's API.
 server.api.add({
@@ -46,7 +34,7 @@ server.api.add({
 server.onsocket = (socket) => {
 
     // Define callbacks for each socket individually.
-    // (P.S. on server better use `server.api.add`).
+    // (P.S. on server, better use `server.api.add`).
     socket.router.on('hello', () => {
         console.log('Hello world');
     });
@@ -67,12 +55,12 @@ var client = tcp.createClient({
 });
 
 // Client managment.
-client.onerror = (err) => { console.log('Client error:', err); };
-client.onstop = () => { console.log('Client stopped.') };
-client.onstart = () => {
+client.onerror  = (err) => { console.log('Client error:', err); };
+client.onstop   = ()    => { console.log('Client stopped.') };
+client.onstart  = ()    => {
     console.log('Client started.');
 
-    // Send messages to server, after we connected.
+    // Send messages to the server after we connected.
     client.router.emit('echo', 'are u mad?', (res) => {
         console.log(res);
     });
