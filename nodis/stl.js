@@ -95,7 +95,7 @@ var Map = (function (_super) {
         if (!(items[0] != null))
             return this.length;
         if (isObjectList(items[0]))
-            items = toArrayPairs(items[0]);
+            items = toArrayPairs(items[0]); // TODO: We never use object list, do we?
         var list = items;
         for (var _a = 0, list_1 = list; _a < list_1.length; _a++) {
             var item = list_1[_a];

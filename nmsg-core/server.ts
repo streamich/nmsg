@@ -3,6 +3,8 @@ import * as transport from './transport';
 import * as serialize from './serialize';
 import * as backoff from './backoff';
 import * as rpc from '../nmsg-rpc/rpc';
+import {TcallbackOnStart} from "./transport";
+import {TcallbackOnError} from "./transport";
 
 
 export type TMessage                    = serialize.TUnpacked;
@@ -67,10 +69,10 @@ export class Server implements IServer {
 
     api = new rpc.Api;
 
-    onsocket:   TcallbackOnSocket = noop;
-    onstart:    transport.TcallbackOnStart = noop;
-    onstop:     transport.TcallbackOnStop = noop;
-    onerror:    transport.TcallbackOnError = noop;
+    onsocket:   TcallbackOnSocket = noop as TcallbackOnSocket;
+    onstart:    transport.TcallbackOnStart = noop as transport.TcallbackOnStart;
+    onstop:     transport.TcallbackOnStop = noop as transport.TcallbackOnStop;
+    onerror:    transport.TcallbackOnError = noop as transport.TcallbackOnError;
 
     constructor(opts: IServerOpts = {}) {
         this.opts = extend(this.opts, opts);

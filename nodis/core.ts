@@ -1,10 +1,12 @@
 import * as store from './store';
 import * as api from './api';
+import * as aol from './aol';
 
 
 export type TArgument = any;
 export type TArgumentList = TArgument[];
-export type TCommand = [string, TArgumentList];
+export type TEvent = string;
+export type TCommand = [TEvent, TArgumentList];
 
 export interface IaofWriter {
     write(obj: any);
@@ -12,40 +14,42 @@ export interface IaofWriter {
 
 
 export interface ICoreOpts {
-    aof: IaofWriter;
+    api: api.TCommandList;
+    storageEngine: aol.StorageEngine.Base;
 }
 
 
 export class Core {
 
     storage = new store.Storage;
-
+    
+    engine: aol.StorageEngine.IBase;
+    
     api: api.TCommandList;
 
-    opts: ICoreOpts = {
-        aof: null,
-    };
-
     constructor(opts: ICoreOpts) {
-        this.opts = opts;
+        this.engine = opts.storageEngine;
+        this.setApi(opts.api);
     }
     
-    exec(command: TCommand) {
-        var [cmd, args] = command;
+    exec(event: TEvent, args: TArgumentList) {
+        var command: TCommand = [event, args];
 
+        // `nmsg-rpc` ensures below type safety:
         // if(typeof cmd !== 'string') return;
         // if(!(args instanceof Array)) return;
 
-        if(!this.api[cmd]) { // API command does not exist.
+        var api = this.api;
+        if(!api[event]) { // API command does not exist.
             if(args.length) {
                 var callback = args[args.length - 1];
                 if(typeof callback === 'function')
-                    callback({msg: `Command "${cmd}" does not exit`});
+                    callback({msg: `Command "${event}" does not exit`});
             }
             return;
         }
 
-        var do_log = this.api[cmd].apply(this, args);
+        var do_log = api[event].apply(this, args);
 
         // Remove the last callback argument, if any, as we don't need it anymore.
         if(args.length && (typeof args[args.length - 1] === 'function')) args.splice(args.length - 1, 1);
@@ -54,12 +58,12 @@ export class Core {
     }
 
     setApi(api: api.TCommandList) {
-        for(var cmd in api) api[cmd] = api[cmd].bind(this);
-        this.api = api;
+        this.api = {};
+        for(var cmd in api) this.api[cmd] = api[cmd].bind(this);
     }
 
     log(command: TCommand) {
-        this.opts.aof.write(command);
+        if(this.engine) this.engine.write(command);
     }
 }
 

@@ -3,24 +3,24 @@ var store = require('./store');
 var Core = (function () {
     function Core(opts) {
         this.storage = new store.Storage;
-        this.opts = {
-            aof: null
-        };
-        this.opts = opts;
+        this.engine = opts.storageEngine;
+        this.setApi(opts.api);
     }
-    Core.prototype.exec = function (command) {
-        var cmd = command[0], args = command[1];
+    Core.prototype.exec = function (event, args) {
+        var command = [event, args];
+        // `nmsg-rpc` ensures below type safety:
         // if(typeof cmd !== 'string') return;
         // if(!(args instanceof Array)) return;
-        if (!this.api[cmd]) {
+        var api = this.api;
+        if (!api[event]) {
             if (args.length) {
                 var callback = args[args.length - 1];
                 if (typeof callback === 'function')
-                    callback({ msg: "Command \"" + cmd + "\" does not exit" });
+                    callback({ msg: "Command \"" + event + "\" does not exit" });
             }
             return;
         }
-        var do_log = this.api[cmd].apply(this, args);
+        var do_log = api[event].apply(this, args);
         // Remove the last callback argument, if any, as we don't need it anymore.
         if (args.length && (typeof args[args.length - 1] === 'function'))
             args.splice(args.length - 1, 1);
@@ -28,12 +28,13 @@ var Core = (function () {
             this.log(command);
     };
     Core.prototype.setApi = function (api) {
+        this.api = {};
         for (var cmd in api)
-            api[cmd] = api[cmd].bind(this);
-        this.api = api;
+            this.api[cmd] = api[cmd].bind(this);
     };
     Core.prototype.log = function (command) {
-        this.opts.aof.write(command);
+        if (this.engine)
+            this.engine.write(command);
     };
     return Core;
 }());

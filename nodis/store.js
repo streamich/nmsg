@@ -6,15 +6,21 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 var stream_1 = require('stream');
 var stl_1 = require('./stl');
+var Key = (function () {
+    function Key() {
+    }
+    Key.create = function (data) {
+        var key = new Key;
+        key.data = data;
+        return key;
+    };
+    return Key;
+}());
+exports.Key = Key;
 var Keys = (function () {
     function Keys() {
         this.map = new stl_1.Map;
-        this.meta = {};
     }
-    Keys.prototype.deleteMeta = function (key) {
-        // TODO: clear timers
-        delete this.meta[key];
-    };
     return Keys;
 }());
 exports.Keys = Keys;
@@ -26,29 +32,12 @@ var SortedSet = (function () {
 exports.SortedSet = SortedSet;
 var Storage = (function () {
     function Storage() {
-        this.key = new Keys;
+        this.keys = new Keys;
         this.sortedSet = new SortedSet;
     }
     return Storage;
 }());
 exports.Storage = Storage;
-function noop() { }
-var commands;
-(function (commands) {
-    commands.set = function (key, value, opts, callback) {
-        var mopts;
-        if (typeof opts === 'function') {
-            callback = opts;
-            mopts = {};
-        }
-        else
-            mopts = opts || {};
-        if (typeof callback !== 'function')
-            callback = noop;
-        var storage = this;
-        storage.key.map.set([key, value]);
-    };
-})(commands = exports.commands || (exports.commands = {}));
 var KeysExporter = (function (_super) {
     __extends(KeysExporter, _super);
     function KeysExporter() {
@@ -62,10 +51,10 @@ var KeysExporter = (function (_super) {
             var index = this.step + i;
             if (index >= map.length)
                 continue;
-            var _a = map.iter(index), key = _a[0], val = _a[1];
+            var _a = map.iter(index), key = _a[0], mykey = _a[1];
             // console.log('step', this.step);
             // console.log('pushing', [key, val]);
-            this.push(JSON.stringify([key, val]));
+            this.push(JSON.stringify([key, mykey.data]));
         }
         this.step += this.batch;
         if (this.step >= map.length)

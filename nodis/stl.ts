@@ -85,7 +85,7 @@ export class Map extends Base {
 
 	set(...items: (TKeyValueMap|TKeyValueMap)[]) {
         if(!(items[0] != null)) return this.length;
-        if(isObjectList(items[0])) items = toArrayPairs(items[0]);
+        if(isObjectList(items[0])) items = toArrayPairs(items[0]); // TODO: We never use object list, do we?
 
         var list = items as TKeyValueTuple[];
         for(var item of list) {
