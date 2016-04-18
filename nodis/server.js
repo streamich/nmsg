@@ -11,7 +11,7 @@ var backoff_1 = require('../nmsg-core/backoff');
 var core = require('./core');
 var path = require('path');
 var aol = require('./aol');
-var api_1 = require('./api');
+var api = require('./api');
 var util_1 = require('./util');
 var NodisServer = (function (_super) {
     __extends(NodisServer, _super);
@@ -20,6 +20,7 @@ var NodisServer = (function (_super) {
         _super.apply(this, arguments);
         this.onEventBound = this.onEvent.bind(this);
         this.onsocket = function (socket) {
+            console.log(socket);
             socket.router.onevent = _this.onEventBound;
         };
     }
@@ -38,7 +39,7 @@ var builder;
             port: 1337
         },
         persistance: {
-            dir: __dirname + '/data',
+            dir: '',
             log: 'data.json.log'
         }
     };
@@ -49,6 +50,8 @@ var builder;
         if (options.persistance)
             opts.persistance = util_1.extend(opts.persistance, options.persistance);
         // Create storage engine.
+        if (!opts.persistance.dir)
+            throw Error('Data folder not set.');
         var engineOpts = {
             dir: path.resolve(opts.persistance.dir),
             log: opts.persistance.log
@@ -57,7 +60,7 @@ var builder;
         // Create Nodis core.
         var nodiscore = new core.Core({
             storageEngine: engine,
-            api: api_1.api
+            api: api
         });
         // Create transport.
         var topts = {

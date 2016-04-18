@@ -1,6 +1,31 @@
 {
-  "dependencies": {
-    "speedr": "0.3.1",
-    "nmsg-tcp": "*"
+  "version": "1.0.0",
+  "name": "nodis",
+  "description": "Redis-like database in Node.js",
+  "main": "dist/nodis.min.js",
+  "keywords": [
+    "nodis",
+    "redis",
+    "db",
+    "database",
+    "tcp",
+    "in-memeory",
+    "memory",
+    "ram",
+    "append-only"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/streamich/nodis"
+  },
+  "scripts": {
+    "mypublish": "npm run dist && npm publish",
+    "test": "mocha",
+    "dist-build": "webpack && echo module.exports= | cat - dist/webpack.js > dist/nodis.js",
+    "dist-min": "uglifyjs dist/nodis.js -o dist/nodis.min.js --compress --mangle",
+    "dist": "npm run dist-build && npm run dist-min"
+  },
+  "devDependencies": {
+    "msgpack-lite": "0.1.17"
   }
 }

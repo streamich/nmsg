@@ -8,6 +8,7 @@ interface IApiError {
     code?: number;
 }
 type IApiCallback = ICallbackTyped <IApiError, any>
+type IApiNoErrorCallback = (result: any, ...more: any[]) => void;
 
 
 declare namespace speedr {

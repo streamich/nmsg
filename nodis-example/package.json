@@ -1,0 +1,26 @@
+{
+  "version": "1.0.0",
+  "name": "nodis-example",
+  "description": "Nodis example skeleton",
+  "main": "index.js",
+  "keywords": [
+    "nodis",
+    "example",
+    "tutorial",
+    "redis",
+    "db",
+    "database",
+    "tcp",
+    "in-memeory",
+    "memory",
+    "ram",
+    "append-only"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/streamich/nodis-example"
+  },
+  "dependencies": {
+    "nodis": "*"
+  }
+}

@@ -1,16 +1,33 @@
 "use strict";
 var server = require('../server');
+// var server = require('../dist/nodis.min');
 var config = require('../nodis.config');
-var tcp = require('../../nmsg-tcp/tcp');
+var client_1 = require('../client');
 var nodis = server.createServer(config).start();
-var client = tcp.createClient(1337).start();
-client.router.emit('ping', function (response) {
+var client = client_1.createClient(1337).start();
+client.cmd('ping', function (response) {
     console.log(response);
 });
-client.router.emit('set', 'counter', 3);
-client.router.emit('get', 'counter', function (err, data) {
-    console.log(err, data);
-});
-client.router.emit('set23', function (res) {
-    console.log(res);
-});
+// client.cmd('set', 'counter', 3);
+// client.cmd('get', 'counter', (err, data) => {
+//     console.log(err, data);
+//
+//     console.log(nodis.core.storage.keys.map.items);
+// });
+//
+// client.cmd('incr', 'counter2', {by: 3, def: 400}, (err, value) => {
+//     console.log('incremented', value);
+//     client.cmd('dec', 'counter2', (err, value) => {
+//         console.log('decremented', value);
+//     })
+// });
+//
+//
+// client.cmd('set23', (res) => {
+//     console.log(res);
+// });
+//
+//
+// client.cmd('api', (list) => {
+//     console.log(list);
+// });

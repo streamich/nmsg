@@ -6,13 +6,21 @@ var Socket = (function () {
         var _this = this;
         this.router = new rpc.Router;
         this.onmessage = util_1.noop;
+        this.onstop = util_1.noop;
+        this.onerror = util_1.noop;
         this.connection = connection;
         this.connection.onmessage = function (msg) {
             _this.onmessage(msg, _this);
             _this.router.onmessage(msg);
         };
+        this.connection.onerror = function (err) { _this.onerror(err); };
+        this.connection.onstop = function () { _this.onstop(); };
         this.router.send = this.send.bind(this);
     }
+    Socket.prototype.stop = function () {
+        this.connection.stop();
+        return this;
+    };
     Socket.prototype.send = function (message) {
         this.connection.send(message);
         return this;

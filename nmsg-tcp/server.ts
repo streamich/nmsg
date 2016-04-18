@@ -10,10 +10,20 @@ import {BackoffExponential as Backoff, IBackoff} from '../nmsg-core/backoff';
 
 
 export class ConnectionTcp extends transport.Connection {
+    protected socket: net.Socket;
     protected 'in': stream.LPDecoderStream;
     protected out:  stream.LPEncoderStream;
 
     setSocket(socket: net.Socket) {
+        this.socket = socket;
+        socket
+            .on('error', (err) => {
+                this.onerror(err);
+            })
+            .on('close', () => {
+                this.onstop();
+            });
+
         this.out = new stream.LPEncoderStream(socket);
         this.in = new stream.LPDecoderStream(socket);
         this.in.on('data', (buf: Buffer) => {
@@ -25,6 +35,10 @@ export class ConnectionTcp extends transport.Connection {
     send(message) {
         var data = this.transport.serialize(message);
         this.out.write(data);
+    }
+
+    stop() {
+        this.socket.end();
     }
 }
 

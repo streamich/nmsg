@@ -18,6 +18,14 @@ var ConnectionTcp = (function (_super) {
     }
     ConnectionTcp.prototype.setSocket = function (socket) {
         var _this = this;
+        this.socket = socket;
+        socket
+            .on('error', function (err) {
+            _this.onerror(err);
+        })
+            .on('close', function () {
+            _this.onstop();
+        });
         this.out = new stream.LPEncoderStream(socket);
         this.in = new stream.LPDecoderStream(socket);
         this.in.on('data', function (buf) {
@@ -28,6 +36,9 @@ var ConnectionTcp = (function (_super) {
     ConnectionTcp.prototype.send = function (message) {
         var data = this.transport.serialize(message);
         this.out.write(data);
+    };
+    ConnectionTcp.prototype.stop = function () {
+        this.socket.end();
     };
     return ConnectionTcp;
 }(transport.Connection));

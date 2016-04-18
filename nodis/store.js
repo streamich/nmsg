@@ -9,9 +9,12 @@ var stl_1 = require('./stl');
 var Key = (function () {
     function Key() {
     }
-    Key.create = function (data) {
+    Key.create = function (data, timestamp) {
         var key = new Key;
         key.data = data;
+        key.meta = {
+            ts: timestamp
+        };
         return key;
     };
     return Key;
@@ -19,7 +22,7 @@ var Key = (function () {
 exports.Key = Key;
 var Keys = (function () {
     function Keys() {
-        this.map = new stl_1.Map;
+        this.map = new stl_1.Map();
     }
     return Keys;
 }());

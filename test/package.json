@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "nmsg-tcp": "*"
+    "nmsg-tcp": "*",
+    "redis": "*"
   }
 }

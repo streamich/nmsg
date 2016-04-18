@@ -5,16 +5,19 @@ import {extend} from './util';
 
 
 // Optional object that associates meta data with keys, such as TTL, expiry timers.
-interface IKeyMeta {
-    ts: number;     // Timestamp when the entry was modified.
+export interface IKeyMeta {
+    ts: number;         // Timestamp when the entry was last modified.
     ttl?: number;
 }
 
 export class Key {
 
-    static create(data) {
+    static create(data, timestamp) {
         var key = new Key;
         key.data = data;
+        key.meta = {
+            ts: timestamp,
+        };
         return key;
     }
 
@@ -23,7 +26,7 @@ export class Key {
 }
 
 export class Keys {
-    map = new Map;
+    map = new Map<Key>();
 }
 
 export class SortedSet {

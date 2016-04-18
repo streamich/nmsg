@@ -31,9 +31,9 @@ function binarySearch(arr, val, exactMatch = false) {
 
 
 type TKey = string;
-type TValue = any;
-type TKeyValueTuple = [TKey, TValue];
-type TKeyValueMap = {[key: string]: TValue}
+type TKeyValueTuple <TValue> = [TKey, TValue];
+// type TKeyValueMap <TValue> = {[key: string]: TValue}
+// type TItems <TValue> = (TKeyValueMap<TValue>|TKeyValueMap<TValue>)[];
 
 
 export abstract class Base {
@@ -68,26 +68,20 @@ export abstract class Base {
 
 
 // Unsorted map with unique keys.
-export class Map extends Base {
-    revKeys: {[s: string]: any} = {};
-    items: {[s: string]: any} = {};
+export class Map <T> extends Base {
+    revKeys: {[s: string]: number} = {};
+    items: {[s: string]: T} = {};
 
-	constructor(...items: any[]) {
-        super();
-        this.set(items);
-        this.updateLength();
-    }
-
-	get(key) {
+	get(key): T {
         // if(typeof key !== 'string') throw 'Invalid key.';
         return this.items[key];
     }
 
-	set(...items: (TKeyValueMap|TKeyValueMap)[]) {
+	set(...items: TKeyValueTuple<T>[]) {
         if(!(items[0] != null)) return this.length;
-        if(isObjectList(items[0])) items = toArrayPairs(items[0]); // TODO: We never use object list, do we?
+        // if(isObjectList(items[0])) items = toArrayPairs(items[0]); // TODO: We never use object list, do we?
 
-        var list = items as TKeyValueTuple[];
+        var list = items as any as TKeyValueTuple<T>[];
         for(var item of list) {
             // if(!isArray(item)) throw 'Attempted set of invalid item.';
             var [key, val] = item;

@@ -1,5 +1,5 @@
 {
-  "version": "1.0.2",
+  "version": "1.0.3",
   "name": "nmsg-tcp",
   "description": "TCP transport for nmsg",
   "main": "dist/nmsg-tcp.min.js",
@@ -30,7 +30,7 @@
     "dist-min": "uglifyjs dist/nmsg-tcp.js -o dist/nmsg-tcp.min.js --compress --mangle",
     "dist": "npm run dist-build && npm run dist-min"
   },
-  "dependencies": {
+  "devDependencies": {
     "msgpack-lite": "0.1.17"
   }
 }

@@ -8,6 +8,8 @@ var util_1 = require('./util');
 var Connection = (function () {
     function Connection() {
         this.onmessage = util_1.noop;
+        this.onstop = util_1.noop;
+        this.onerror = util_1.noop;
     }
     return Connection;
 }());

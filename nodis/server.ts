@@ -5,7 +5,7 @@ import {BackoffExponential as Backoff} from '../nmsg-core/backoff';
 import * as core from './core';
 import * as path from 'path';
 import * as aol from './aol';
-import {api} from './api';
+import * as api from './api';
 import {extend} from './util';
 
 
@@ -16,6 +16,7 @@ export class NodisServer extends server.Server {
     onEventBound = this.onEvent.bind(this);
 
     onsocket = (socket) => {
+        console.log(socket);
         socket.router.onevent = this.onEventBound;
     };
 
@@ -44,7 +45,7 @@ namespace builder {
             port: 1337,
         },
         persistance: {
-            dir: __dirname + '/data',
+            dir: '',
             log: 'data.json.log',
         }
     };
@@ -56,6 +57,7 @@ namespace builder {
 
 
         // Create storage engine.
+        if(!opts.persistance.dir) throw Error('Data folder not set.');
         var engineOpts = {
             dir: path.resolve(opts.persistance.dir),
             log: opts.persistance.log,
@@ -66,7 +68,7 @@ namespace builder {
         // Create Nodis core.
         var nodiscore = new core.Core({
             storageEngine: engine,
-            api: api,
+            api: api as any as api.Iapi.Interface,
         });
 
 

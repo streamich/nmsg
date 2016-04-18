@@ -13,7 +13,10 @@ export type TcallbackOnError        = (err: Error) => void;
 
 export interface IConnection {
     onmessage: TcallbackOnMessage;
+    onstop:    TcallbackOnStop;
+    onerror:   TcallbackOnError;
     send(message: TUnpacked);
+    stop();
 }
 
 export interface ITransportOpts {
@@ -40,9 +43,12 @@ export abstract class Connection implements IConnection {
 
     transport: Transport;
 
-    onmessage: TcallbackOnMessage = noop as TcallbackOnMessage;
+    onmessage:  TcallbackOnMessage  = noop as TcallbackOnMessage;
+    onstop:     TcallbackOnStop     = noop as TcallbackOnStop;
+    onerror:    TcallbackOnError    = noop as TcallbackOnError;
 
     abstract send(message: TUnpacked);
+    abstract stop();
 }
 
 export abstract class Transport implements ITransport {

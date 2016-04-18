@@ -35,6 +35,8 @@ function binarySearch(arr, val, exactMatch) {
     else
         return h;
 }
+// type TKeyValueMap <TValue> = {[key: string]: TValue}
+// type TItems <TValue> = (TKeyValueMap<TValue>|TKeyValueMap<TValue>)[];
 var Base = (function () {
     function Base() {
         this.keys = [];
@@ -73,15 +75,9 @@ exports.Base = Base;
 var Map = (function (_super) {
     __extends(Map, _super);
     function Map() {
-        var items = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            items[_i - 0] = arguments[_i];
-        }
-        _super.call(this);
+        _super.apply(this, arguments);
         this.revKeys = {};
         this.items = {};
-        this.set(items);
-        this.updateLength();
     }
     Map.prototype.get = function (key) {
         // if(typeof key !== 'string') throw 'Invalid key.';
@@ -94,8 +90,7 @@ var Map = (function (_super) {
         }
         if (!(items[0] != null))
             return this.length;
-        if (isObjectList(items[0]))
-            items = toArrayPairs(items[0]); // TODO: We never use object list, do we?
+        // if(isObjectList(items[0])) items = toArrayPairs(items[0]); // TODO: We never use object list, do we?
         var list = items;
         for (var _a = 0, list_1 = list; _a < list_1.length; _a++) {
             var item = list_1[_a];
