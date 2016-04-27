@@ -1,7 +1,7 @@
 // AOL (append-only-log)
 import {Readable, Writable} from 'stream';
 import * as fs from 'fs';
-import {extend} from './util';
+import {extend, noop} from './util';
 
 
 export class LineReader {
@@ -14,7 +14,9 @@ export class LineReader {
 
     stream: Readable;
 
-    onLine: (line: string) => void = () => {};
+    onLine: (line: string) => void = noop;
+
+    onStop: () => void = noop;
 
     reminder = '';
 
@@ -40,6 +42,7 @@ export class LineReader {
         this.stream.on('end', () => {
             if(this.reminder) this.sendLine(this.reminder);
             this.reminder = '';
+            this.onStop();
         });
     }
 }
@@ -100,25 +103,29 @@ export namespace StorageEngine {
     export interface IBase {
         write(obj: any);
         runCompaction();
+        replay(onCommand: (cmd) => void, onParseError: (err) => void, done: (err?) => void);
     }
 
     export abstract class Base implements IBase {
         opts: IBaseOptions;
         abstract write(obj: any);
         abstract runCompaction();
+        abstract replay(onCommand: (cmd) => void, onParseError: (err) => void, done: (err?) => void);
     }
 
     export interface IFileOptions extends IBaseOptions {
         dir: string;    // Directory where files are written.
-        log: string;    // Databse file name. e.g., `data.json.log`
+        data: string;   // Database file name. e.g., `data.json.log`
     }
 
     export class File extends Base {
 
         static defaults: IFileOptions = {
             dir: '.',
-            log: 'data.json.log',
+            data: 'data.json.log',
         };
+
+        aof: AolFile;
 
         opts: IFileOptions;
 
@@ -130,9 +137,13 @@ export namespace StorageEngine {
             super();
             this.opts = extend({} as any, File.defaults, opts);
 
-            var aof = AolFile.createFromFile(`${this.opts.dir}/${this.opts.log}`);
+            this.aof = AolFile.createFromFile(this.getFileName());
             this.fork = new AolStoreFork;
-            this.fork.set('aof', aof);
+            this.fork.set('aof', this.aof);
+        }
+
+        getFileName() {
+            return `${this.opts.dir}/${this.opts.data}`;
         }
 
         write(obj: any) {
@@ -141,6 +152,26 @@ export namespace StorageEngine {
 
         runCompaction() {
 
+        }
+
+        replay(onCommand: (cmd) => void, onParseError: (err) => void, done: (err?) => void) {
+            // While reading, stop writing to the same file.
+            this.fork.remove('aof');
+
+            var reader = LineReader.createFromFile(this.getFileName());
+            reader.onLine = (line: string) => {
+                try {
+                    var obj = JSON.parse(line);
+                    onCommand(obj);
+                } catch(e) {
+                    onParseError(e);
+                }
+            };
+            reader.onStop = () => {
+                this.fork.set('aof', this.aof);
+                done();
+            };
+            reader.start();
         }
     }
 }

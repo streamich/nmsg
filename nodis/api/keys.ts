@@ -2,6 +2,8 @@ import {Core, ICommandContext as Context} from '../core';
 import {Key} from '../store';
 import {noop} from '../util';
 import {Iapi} from '../api';
+import debuglib = require('debug');
+var debug = debuglib('nodis:api:keys');
 
 
 function stopIfInvalidKeyParam(key: string, code = 0, callback?) {
@@ -17,6 +19,8 @@ function stopIfInvalidKeyParam(key: string, code = 0, callback?) {
 
 
 export var set: Iapi.set = function(key, data, options?, callback?) {
+    debug('set', key, data);
+
     var opts: Iapi.setOptions;
     if(typeof options === 'function') {
         callback = options as IApiCallback;
@@ -34,16 +38,17 @@ export var set: Iapi.set = function(key, data, options?, callback?) {
     if(mykey) { // Update.
         if(!opts.ifNotExist) {
             var ts = mykey.meta.ts || 0;
-            var is_fresher = ts < ctx.meta.ts;
+            var ts_ctx = ctx.meta.ts;
+            var is_fresher = ts < ts_ctx;
             if(is_fresher) {
                 mykey.data = data;
-                mykey.meta.ts = ctx.core.ts();
+                mykey.meta.ts = ts_ctx;
                 return true;
             }
         }
     } else { // Create new.
         if(!opts.ifExist) {
-            mykey = Key.create(data, ctx.core.ts());
+            mykey = Key.create(data, ctx.meta.ts);
             map.set([key, mykey]);
             return true; // Log this command.
         }
@@ -52,6 +57,8 @@ export var set: Iapi.set = function(key, data, options?, callback?) {
 
 
 export var get: Iapi.get = function(key, callback) {
+    debug('get', key);
+
     if(typeof callback !== 'function') return;
     if(stopIfInvalidKeyParam(key, 0, callback)) return;
 
@@ -71,6 +78,8 @@ export var get: Iapi.get = function(key, callback) {
 
 
 export var del: Iapi.del = function(key, callback = noop) {
+    debug('del', key);
+
     if(typeof callback !== 'function') return;
     if(stopIfInvalidKeyParam(key, 0, callback)) return;
 
@@ -92,6 +101,8 @@ export var del: Iapi.del = function(key, callback = noop) {
 
 
 export var incr: Iapi.incr = function(key, options?: Iapi.incrOptions, callback?) {
+    debug('incr', key, options);
+
     if(typeof options === 'function')   callback = options as any as IApiCallback;
     if(typeof options !== 'object')     options = {} as Iapi.incrOptions;
     if(typeof callback !== 'function')  callback = noop as IApiCallback;
@@ -135,6 +146,8 @@ export var incr: Iapi.incr = function(key, options?: Iapi.incrOptions, callback?
 
 
 export var decr: Iapi.decr = function(key, options?: number|Iapi.incrOptions, callback?) {
+    debug('decr', key, options);
+
     var core = this.core as Core;
     switch(typeof options) {
         case 'number': return core.api.incr.call(this, key, -options, callback);
@@ -155,6 +168,8 @@ export var decr: Iapi.decr = function(key, options?: number|Iapi.incrOptions, ca
 
 
 export var inc: Iapi.inc = function(key, callback?) {
+    debug('inc', key);
+
     if(stopIfInvalidKeyParam(key, 0, callback)) return;
     if(typeof callback !== 'function') callback = noop as IApiCallback;
 
@@ -169,6 +184,8 @@ export var inc: Iapi.inc = function(key, callback?) {
 
 
 export var dec: Iapi.dec = function(key, callback?) {
+    debug('dec', key);
+
     if(stopIfInvalidKeyParam(key, 0, callback)) return;
     if(typeof callback !== 'function') callback = noop as IApiCallback;
 

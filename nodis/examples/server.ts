@@ -3,19 +3,35 @@ import * as server from '../server';
 var config = require('../nodis.config');
 import * as tcp from '../../nmsg-tcp/tcp';
 import {createClient} from '../client';
+import {Cluster, Hashspace} from '../cluster';
 
 
-var nodis = server.createServer(config).start();
+var cluster = Cluster.Factory.createCluster(config);
+cluster.start();
+console.log(cluster);
+console.log(Hashspace.hash('asdfdsasf'));
 
 
-var client = createClient(1337).start();
+// var client = createClient(1337).start();
+//
+// client.cmd('ping', (response) => {
+//     console.log(response);
+// });
+//
+// client.cmd('api', (err, res) => {
+//     console.log(err, res);
+// });
+// client.cmd('get', 'boris', (err, res) => {
+//     console.log(err, res);
+// });
 
-client.cmd('ping', (response) => {
-    console.log(response);
-});
+// client.cmd('udfSet', 'console.log(123);', (err, res) => {
+//     console.log(err, res);
+// });
+
+// client.cmd('set', 'boris', {id: 'fk2n32k', name: 'Boris Jonson'});
 
 
-// client.cmd('set', 'counter', 3);
 // client.cmd('get', 'counter', (err, data) => {
 //     console.log(err, data);
 //

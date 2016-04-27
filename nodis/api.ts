@@ -3,6 +3,7 @@ import {Core} from './core';
 
 export * from './api/keys';
 export * from './api/sys';
+export * from './api/udf';
 
 // export type TCommandList = {[command: string]: (...args: any[]) => void};
 
@@ -32,6 +33,8 @@ export namespace Iapi {
     export type ping = (callback: (response: string) => void) => void;
     export type api = (callback: (list: string[]) => void) => void;
 
+    export type udfSet = (key: string, script: string, callback?: IApiCallback) => boolean;
+
 
     export interface Interface {
         set: set;
@@ -44,5 +47,7 @@ export namespace Iapi {
 
         ping: ping;
         api: api;
+
+        udfSet: udfSet;
     }
 }

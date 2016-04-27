@@ -1,6 +1,8 @@
 "use strict";
 var store_1 = require('../store');
 var util_1 = require('../util');
+var debuglib = require('debug');
+var debug = debuglib('nodis:api:keys');
 function stopIfInvalidKeyParam(key, code, callback) {
     if (code === void 0) { code = 0; }
     if (!key || (typeof key !== 'string')) {
@@ -14,6 +16,7 @@ function stopIfInvalidKeyParam(key, code, callback) {
     return false;
 }
 exports.set = function (key, data, options, callback) {
+    debug('set', key, data);
     var opts;
     if (typeof options === 'function') {
         callback = options;
@@ -32,23 +35,25 @@ exports.set = function (key, data, options, callback) {
     if (mykey) {
         if (!opts.ifNotExist) {
             var ts = mykey.meta.ts || 0;
-            var is_fresher = ts < ctx.meta.ts;
+            var ts_ctx = ctx.meta.ts;
+            var is_fresher = ts < ts_ctx;
             if (is_fresher) {
                 mykey.data = data;
-                mykey.meta.ts = ctx.core.ts();
+                mykey.meta.ts = ts_ctx;
                 return true;
             }
         }
     }
     else {
         if (!opts.ifExist) {
-            mykey = store_1.Key.create(data, ctx.core.ts());
+            mykey = store_1.Key.create(data, ctx.meta.ts);
             map.set([key, mykey]);
             return true; // Log this command.
         }
     }
 };
 exports.get = function (key, callback) {
+    debug('get', key);
     if (typeof callback !== 'function')
         return;
     if (stopIfInvalidKeyParam(key, 0, callback))
@@ -65,6 +70,7 @@ exports.get = function (key, callback) {
 };
 exports.del = function (key, callback) {
     if (callback === void 0) { callback = util_1.noop; }
+    debug('del', key);
     if (typeof callback !== 'function')
         return;
     if (stopIfInvalidKeyParam(key, 0, callback))
@@ -87,6 +93,7 @@ exports.del = function (key, callback) {
 };
 exports.incr = function (key, options, callback) {
     var _this = this;
+    debug('incr', key, options);
     if (typeof options === 'function')
         callback = options;
     if (typeof options !== 'object')
@@ -139,6 +146,7 @@ exports.incr = function (key, options, callback) {
     return true;
 };
 exports.decr = function (key, options, callback) {
+    debug('decr', key, options);
     var core = this.core;
     switch (typeof options) {
         case 'number': return core.api.incr.call(this, key, -options, callback);
@@ -160,6 +168,7 @@ exports.decr = function (key, options, callback) {
     }
 };
 exports.inc = function (key, callback) {
+    debug('inc', key);
     if (stopIfInvalidKeyParam(key, 0, callback))
         return;
     if (typeof callback !== 'function')
@@ -177,6 +186,7 @@ exports.inc = function (key, callback) {
     return true;
 };
 exports.dec = function (key, callback) {
+    debug('dec', key);
     if (stopIfInvalidKeyParam(key, 0, callback))
         return;
     if (typeof callback !== 'function')

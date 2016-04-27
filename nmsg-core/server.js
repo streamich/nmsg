@@ -14,7 +14,7 @@ var Socket = (function () {
             _this.router.onmessage(msg);
         };
         this.connection.onerror = function (err) { _this.onerror(err); };
-        this.connection.onstop = function () { _this.onstop(); };
+        this.connection.onstop = function () { _this.onstop(_this); };
         this.router.send = this.send.bind(this);
     }
     Socket.prototype.stop = function () {

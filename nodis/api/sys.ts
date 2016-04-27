@@ -15,3 +15,9 @@ export var api: Iapi.api = function(callback) {
     var core = this.core as Core;
     callback(Object.keys(core.api));
 };
+
+
+export var fsync = function(callback) {
+
+};
+

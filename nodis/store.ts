@@ -25,6 +25,10 @@ export class Key {
     meta: IKeyMeta;
 }
 
+export class KeyUdf extends Key {
+
+}
+
 export class Keys {
     map = new Map<Key>();
 }
@@ -36,6 +40,8 @@ export class SortedSet {
 export class Storage {
     keys = new Keys;
     sortedSet = new SortedSet;
+    udfs = {};
+    udfCount = 0;
 }
 
 export class KeysExporter extends Readable {

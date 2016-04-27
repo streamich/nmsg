@@ -24,7 +24,7 @@
     "url": "https://github.com/streamich/nmsg"
   },
   "scripts": {
-    "start": "npm i -g tsd mocha webpack uglify-js && tsd install node && tsd install mocha && tsd install chai"
+    "start": "npm i -g tsd mocha webpack uglify-js && tsd install node && tsd install mocha && tsd install chai && tsd install debug"
   },
   "devDependencies": {
     "dts-generator": "1.7.0",

@@ -20,6 +20,14 @@ var Key = (function () {
     return Key;
 }());
 exports.Key = Key;
+var KeyUdf = (function (_super) {
+    __extends(KeyUdf, _super);
+    function KeyUdf() {
+        _super.apply(this, arguments);
+    }
+    return KeyUdf;
+}(Key));
+exports.KeyUdf = KeyUdf;
 var Keys = (function () {
     function Keys() {
         this.map = new stl_1.Map();
@@ -37,6 +45,8 @@ var Storage = (function () {
     function Storage() {
         this.keys = new Keys;
         this.sortedSet = new SortedSet;
+        this.udfs = {};
+        this.udfCount = 0;
     }
     return Storage;
 }());

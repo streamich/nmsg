@@ -1,14 +1,27 @@
 "use strict";
-var server = require('../server');
 // var server = require('../dist/nodis.min');
 var config = require('../nodis.config');
-var client_1 = require('../client');
-var nodis = server.createServer(config).start();
-var client = client_1.createClient(1337).start();
-client.cmd('ping', function (response) {
-    console.log(response);
-});
-// client.cmd('set', 'counter', 3);
+var cluster_1 = require('../cluster');
+var cluster = cluster_1.Cluster.Factory.createCluster(config);
+cluster.start();
+console.log(cluster);
+console.log(cluster_1.Hashspace.hash('asdfdsasf'));
+// var client = createClient(1337).start();
+//
+// client.cmd('ping', (response) => {
+//     console.log(response);
+// });
+//
+// client.cmd('api', (err, res) => {
+//     console.log(err, res);
+// });
+// client.cmd('get', 'boris', (err, res) => {
+//     console.log(err, res);
+// });
+// client.cmd('udfSet', 'console.log(123);', (err, res) => {
+//     console.log(err, res);
+// });
+// client.cmd('set', 'boris', {id: 'fk2n32k', name: 'Boris Jonson'});
 // client.cmd('get', 'counter', (err, data) => {
 //     console.log(err, data);
 //

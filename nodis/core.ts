@@ -1,6 +1,8 @@
 import * as store from './store';
 import * as api from './api';
 import * as aol from './aol';
+import debuglib = require('debug');
+var debug = debuglib('nodis:core');
 
 
 export type TArgument = any;
@@ -22,6 +24,7 @@ export interface ICommandContext {
 export interface ICoreOpts {
     api: api.Iapi.Interface;
     storageEngine: aol.StorageEngine.Base;
+    err: aol.AolFile;
 }
 
 
@@ -30,6 +33,8 @@ export class Core {
     storage = new store.Storage;
     
     engine: aol.StorageEngine.IBase;
+
+    err: aol.AolFile;
     
     api: api.Iapi.Interface;
 
@@ -39,10 +44,26 @@ export class Core {
 
     constructor(opts: ICoreOpts) {
         this.engine = opts.storageEngine;
+        this.err = opts.err;
         this.setApi(opts.api);
     }
     
-    exec(event: TEvent, args: TArgumentList) {
+    start(done: (err) => void) {
+        var onCommand = (cmd) => {
+            var [event, args, meta] = cmd;
+            // TODO: Validate incoming data.
+            this.exec(event, args, meta);
+        };
+        var onParseError = (err) => {
+            this.logError(err);
+        };
+        this.engine.replay(onCommand, onParseError, (err?) => {
+            if(err) this.logError(err);
+            done(err);
+        });
+    }
+    
+    exec(event: TEvent, args: TArgumentList, meta?) {
         var command: TCommand = [event, args];
 
         var api = this.api;
@@ -51,15 +72,15 @@ export class Core {
                 var callback = args[args.length - 1];
                 if(typeof callback === 'function')
                     callback({msg: `Command "${event}" does not exit`});
+                this.logError({msg: 'Invalid command', cmd: event});
             }
             return;
         }
 
+        if(!meta) meta = {ts: this.ts()};
         var ctx = {
             core: this,
-            meta: {
-                ts: this.ts(),
-            }
+            meta: meta,
         };
         var do_log = api[event].apply(ctx, args);
         if(do_log) this.log(command, ctx.meta);
@@ -83,5 +104,13 @@ export class Core {
 
     ts() {
         return +new Date;
+    }
+
+    logError(obj: any) {
+        debug('ERROR', obj);
+        if(obj instanceof Error) {
+            console.log(obj.stack);
+            this.err.write({msg: obj.message});
+        } else this.err.write(obj);
     }
 }

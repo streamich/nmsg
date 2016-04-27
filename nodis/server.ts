@@ -1,95 +1,69 @@
 import {TransportTcp} from '../nmsg-tcp/server';
-import * as server from '../nmsg-core/server';
+import * as nmsg from '../nmsg-core/server';
 import {Msgpack as Serializer} from '../nmsg-tcp/serialize';
 import {BackoffExponential as Backoff} from '../nmsg-core/backoff';
 import * as core from './core';
-import * as path from 'path';
-import * as aol from './aol';
-import * as api from './api';
-import {extend} from './util';
 
 
-export class NodisServer extends server.Server {
+export class Server {
 
-    core: core.Core;
-
-    onEventBound = this.onEvent.bind(this);
-
-    onsocket = (socket) => {
-        console.log(socket);
-        socket.router.onevent = this.onEventBound;
-    };
-
-    onEvent(event: string, args: any[]) {
-        this.core.exec(event, args);
-        return true; // Stops any further routing.
-    }
-}
-
-
-namespace builder {
-    export interface IcreateServerOptions {
-        transport: {
-            host: string;
-            port: number;
-        },
-        persistance: {
-            dir: string;
-            log: string;
-        }
-    }
-
-    export var defaults: IcreateServerOptions = {
-        transport: {
-            host: '0.0.0.0',    // Listen to all hosts.
-            port: 1337,
-        },
-        persistance: {
-            dir: '',
-            log: 'data.json.log',
-        }
-    };
-
-    export function createServer(options: IcreateServerOptions) {
-        var opts = extend({} as IcreateServerOptions, defaults);
-        if(options.transport)   opts.transport      = extend(opts.transport, options.transport);
-        if(options.persistance) opts.persistance    = extend(opts.persistance, options.persistance);
-
-
-        // Create storage engine.
-        if(!opts.persistance.dir) throw Error('Data folder not set.');
-        var engineOpts = {
-            dir: path.resolve(opts.persistance.dir),
-            log: opts.persistance.log,
-        };
-        var engine = new aol.StorageEngine.File(engineOpts);
-
-
-        // Create Nodis core.
-        var nodiscore = new core.Core({
-            storageEngine: engine,
-            api: api as any as api.Iapi.Interface,
-        });
-
-
-        // Create transport.
-        var topts = {
-            host: opts.transport.host,
-            port: opts.transport.port,
-            serializer: new Serializer,
-        };
-        var transport = new TransportTcp(topts);
-
-
-        // Create server.
-        var sopts = {
-            transport: transport,
+    static create(port = 1337, host = '0.0.0.0') {
+        return new Server({
+            transport: new TransportTcp({
+                host: host,
+                port: port,
+                serializer: new Serializer,
+            }),
             backoff: new Backoff,
-        };
-        var server = new NodisServer(sopts);
-        server.core = nodiscore;
-        return server;
+        });
     }
-}
 
-export var createServer = builder.createServer;
+
+    nmsg: nmsg.Server;
+
+    sockets: nmsg.Socket[] = [];
+
+    constructor(opts: nmsg.IServerOpts) {
+        this.nmsg = new nmsg.Server(opts);
+        this.nmsg.onsocket = this.onSocket.bind(this);
+    }
+
+    onSocket(socket) {
+        this.sockets.push(socket);
+        socket.onstop = this.onSocketStop.bind(this);
+    }
+
+    onSocketStop(socket) {
+        for(var i = 0; i < this.sockets.length; i++) {
+            var sock = this.sockets[i];
+            if(sock == socket) {
+                this.sockets.splice(i, 1);
+                break;
+            }
+        }
+    }
+
+    start() {
+        
+    }
+
+    // core: core.Core;
+    //
+    // onEventBound = this.onEvent.bind(this);
+    //
+    // onsocket = (socket) => {
+    //     socket.router.onevent = this.onEventBound;
+    // };
+
+    // onEvent(event: string, args: any[]) {
+    //     this.core.exec(event, args);
+    //     return true; // Stops any further routing.
+    // }
+
+    // start() {
+    //     this.core.start((err) => {
+    //         if(!err) super.start();
+    //     });
+    //     return this;
+    // }
+}

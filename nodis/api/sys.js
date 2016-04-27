@@ -9,3 +9,5 @@ exports.api = function (callback) {
     var core = this.core;
     callback(Object.keys(core.api));
 };
+exports.fsync = function (callback) {
+};

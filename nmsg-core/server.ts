@@ -10,13 +10,14 @@ import {TcallbackOnError} from "./transport";
 export type TMessage                    = serialize.TUnpacked;
 export type TcallbackOnSocketMessage    = (message: TMessage, socket?: ISocket) => void;
 export type TcallbackOnSocket           = (socket: ISocket) => void;
+export type TcallbackOnSocketStop       = (socket: ISocket) => void;
 // export type TcallbackWiretapServer      = (message: TMessage, socket: ISocket) => void;
 
 
 export interface ISocket {
     router: rpc.Router;
     onmessage:  TcallbackOnSocketMessage;
-    onstop:     transport.TcallbackOnStop;
+    onstop:     TcallbackOnSocketStop;
     onerror:    transport.TcallbackOnError;
     send(msg: TMessage): this;
     stop(): this;
@@ -46,7 +47,7 @@ export class Socket implements ISocket {
     router = new rpc.Router;
 
     onmessage:  TcallbackOnSocketMessage    = noop as TcallbackOnSocketMessage;
-    onstop:     transport.TcallbackOnStop   = noop as transport.TcallbackOnStop;
+    onstop:     TcallbackOnSocketStop       = noop as TcallbackOnSocketStop;
     onerror:    transport.TcallbackOnError  = noop as transport.TcallbackOnError;
 
     constructor(connection: transport.Connection) {
@@ -56,7 +57,7 @@ export class Socket implements ISocket {
             this.router.onmessage(msg);
         };
         this.connection.onerror = (err) => { this.onerror(err); };
-        this.connection.onstop = () => { this.onstop(); };
+        this.connection.onstop = () => { this.onstop(this); };
         this.router.send = this.send.bind(this);
     }
 

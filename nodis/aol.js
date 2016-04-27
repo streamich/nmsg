@@ -8,7 +8,8 @@ var fs = require('fs');
 var util_1 = require('./util');
 var LineReader = (function () {
     function LineReader() {
-        this.onLine = function () { };
+        this.onLine = util_1.noop;
+        this.onStop = util_1.noop;
         this.reminder = '';
     }
     LineReader.createFromFile = function (path) {
@@ -40,6 +41,7 @@ var LineReader = (function () {
             if (_this.reminder)
                 _this.sendLine(_this.reminder);
             _this.reminder = '';
+            _this.onStop();
         });
     };
     return LineReader;
@@ -103,18 +105,41 @@ var StorageEngine;
         function File(opts) {
             _super.call(this);
             this.opts = util_1.extend({}, File.defaults, opts);
-            var aof = AolFile.createFromFile(this.opts.dir + "/" + this.opts.log);
+            this.aof = AolFile.createFromFile(this.getFileName());
             this.fork = new AolStoreFork;
-            this.fork.set('aof', aof);
+            this.fork.set('aof', this.aof);
         }
+        File.prototype.getFileName = function () {
+            return this.opts.dir + "/" + this.opts.data;
+        };
         File.prototype.write = function (obj) {
             this.fork.write(obj);
         };
         File.prototype.runCompaction = function () {
         };
+        File.prototype.replay = function (onCommand, onParseError, done) {
+            var _this = this;
+            // While reading, stop writing to the same file.
+            this.fork.remove('aof');
+            var reader = LineReader.createFromFile(this.getFileName());
+            reader.onLine = function (line) {
+                try {
+                    var obj = JSON.parse(line);
+                    onCommand(obj);
+                }
+                catch (e) {
+                    onParseError(e);
+                }
+            };
+            reader.onStop = function () {
+                _this.fork.set('aof', _this.aof);
+                done();
+            };
+            reader.start();
+        };
         File.defaults = {
             dir: '.',
-            log: 'data.json.log'
+            data: 'data.json.log'
         };
         return File;
     }(Base));

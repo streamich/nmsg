@@ -1,5 +1,7 @@
 # Nodis is like Redis, but in Node.js
 
+`nodis` stands for Node Dictionary Server.
+
 Features:
 
  - In-memory database written in JavaScript.

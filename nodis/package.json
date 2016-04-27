@@ -25,6 +25,10 @@
     "dist-min": "uglifyjs dist/nodis.js -o dist/nodis.min.js --compress --mangle",
     "dist": "npm run dist-build && npm run dist-min"
   },
+  "dependencies": {
+    "debug": "2.2.0",
+    "js-combinatorics": "0.5.1"
+  },
   "devDependencies": {
     "msgpack-lite": "0.1.17"
   }

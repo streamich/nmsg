@@ -1,9 +1,9 @@
-import * as tcp from '../nmsg-tcp/tcp';
-import {Client} from '../nmsg-core/client';
+import * as tcp from '../nmsg-tcp/client';
+import {Client as NmsgClient} from '../nmsg-core/client';
 
 
-export class NodisClient {
-    tcp: Client;
+export class Client {
+    tcp: NmsgClient;
 
     constructor(port = 1337, host = '127.0.0.1') {
         this.tcp = tcp.createClient({
@@ -28,5 +28,5 @@ export class NodisClient {
 
 
 export function createClient(port?, host?) {
-    return new NodisClient(port, host);
+    return new Client(port, host);
 }
