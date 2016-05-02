@@ -35,7 +35,7 @@ var Frame = (function () {
         return !!this.rid;
     };
     Frame.id = 0;
-    Frame.timeout = 5000; // Default timeout (in milliseconds), so that we don't send timeout value with every request.
+    Frame.timeout = 15000; // Default timeout (in milliseconds), so that we don't send timeout value with every request.
     return Frame;
 }());
 exports.Frame = Frame;

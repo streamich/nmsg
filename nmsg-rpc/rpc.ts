@@ -42,7 +42,7 @@ export abstract class Frame {
         return Frame.id = (Frame.id % 1000000000) + 1; // Always greater than 0.
     }
 
-    static timeout = 5000; // Default timeout (in milliseconds), so that we don't send timeout value with every request.
+    static timeout = 15000; // Default timeout (in milliseconds), so that we don't send timeout value with every request.
 
     data: IFrameDataInitiation | IFrameDataResponse = null;
 

@@ -3,3 +3,12 @@
 /examples
 tsconfig.json
 nmsg-rpc.d.ts
+/dist
+dts.js
+.npmignore
+umd.ts
+umd.js
+webpack.config.js
+/test
+rpc.ts
+util.ts
