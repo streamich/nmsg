@@ -219,7 +219,10 @@ var Router = (function () {
         if (frame.hasCallbacks()) {
             this.frame[frame.id] = frame;
             // Remove this frame after some timeout, if callbacks not called.
-            this.timer[frame.id] = setTimeout(function () { delete _this.frame[frame.id]; }, frame.timeout + this.latency);
+            this.timer[frame.id] = setTimeout(function () {
+                delete _this.frame[frame.id];
+                delete _this.timer[frame.id];
+            }, frame.timeout + this.latency);
         }
         var data = frame.serialize();
         // console.log('dispatch', data);
@@ -299,7 +302,7 @@ var RouterBuffered = (function (_super) {
     function RouterBuffered() {
         _super.apply(this, arguments);
         this.cycle = 10; // Milliseconds for how long to buffer requests.
-        this.timer = 0;
+        this.cycleTimer = 0;
         this.buffer = [];
     }
     RouterBuffered.prototype.flush = function () {
@@ -313,9 +316,9 @@ var RouterBuffered = (function (_super) {
     };
     RouterBuffered.prototype.startTimer = function () {
         var _this = this;
-        if (!this.timer) {
-            this.timer = setTimeout(function () {
-                _this.timer = 0;
+        if (!this.cycleTimer) {
+            this.cycleTimer = setTimeout(function () {
+                _this.cycleTimer = 0;
                 _this.flush();
             }, this.cycle);
         }

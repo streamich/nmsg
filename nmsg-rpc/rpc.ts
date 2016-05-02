@@ -247,7 +247,10 @@ export class Router {
             this.frame[frame.id] = frame;
 
             // Remove this frame after some timeout, if callbacks not called.
-            this.timer[frame.id] = setTimeout(() => { delete this.frame[frame.id]; }, frame.timeout + this.latency);
+            this.timer[frame.id] = setTimeout(() => {
+                delete this.frame[frame.id];
+                delete this.timer[frame.id];
+            }, frame.timeout + this.latency);
         }
 
         var data = frame.serialize();
@@ -321,7 +324,7 @@ export class RouterBuffered extends Router {
 
     cycle = 10; // Milliseconds for how long to buffer requests.
 
-    protected timer: any = 0;
+    protected cycleTimer: any = 0;
 
     protected buffer: FrameList = [];
 
@@ -337,9 +340,9 @@ export class RouterBuffered extends Router {
     }
 
     protected startTimer() {
-        if(!this.timer) {
-            this.timer = setTimeout(() => {
-                this.timer = 0;
+        if(!this.cycleTimer) {
+            this.cycleTimer = setTimeout(() => {
+                this.cycleTimer = 0;
                 this.flush();
             }, this.cycle);
         }

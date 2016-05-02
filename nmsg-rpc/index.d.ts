@@ -70,7 +70,7 @@ export class Router {
 }
 export class RouterBuffered extends Router {
     cycle: number;
-    protected timer: any;
+    protected cycleTimer: any;
     protected buffer: FrameList;
     protected flush(): void;
     protected sendData(data: any): void;
