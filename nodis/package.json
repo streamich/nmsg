@@ -26,7 +26,7 @@
     "dist": "npm run dist-build && npm run dist-min"
   },
   "dependencies": {
-    "debug": "2.2.0",
+    "debug": "3.1.0",
     "js-combinatorics": "0.5.1"
   },
   "devDependencies": {
